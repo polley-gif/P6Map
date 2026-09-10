@@ -1,11 +1,11 @@
 <!doctype html>
-<html lang="en"><head><script>window["__codeletBootstrap__"]=JSON.parse('{"A":"A","B":"20260909-03-97f2ba6","C":{"Abril Fatface":"YACgEZbkUVE,0","Alfa Slab One":"YACgEYS9sJU,0","Anton":"YACgEcYqQ-A,0","Archivo":"YAHO2-t-jNE,0","Arial":"YAGyDvJ_4Ts,0","Bebas Neue":"YACgESME5ew,0","Bricolage Grotesque":"YAFyMcdwzpc,0","Canva Sans":"YAFLd8sKbwc,2","Caveat":"YALBs2ploWQ,0","Comic Sans MS":"YAHO2VMiyZo,0","Cormorant Garamond":"YAFdJhX-538,0","Courier New":"YAGzXiGs0_8,0","DM Sans":"YAD1aU3sLnI,0","DM Serif Display":"YAD1aYG82rc,0","Forum":"YACgEcnnqB4,0","Fraunces":"YAEul-FRQw4,0","Georgia":"YAGzXkO0pEM,0","Helvetica Neue":"YAFcf6CtJfI,0","Impact":"YAFcfnjI7Vk,0","Inter":"YAFdJvSyp_k,3","Iowan Old Style":"YAGNIFa8j9o,0","Jacques Francois":"YAHO2a5g66Q,0","JetBrains Mono":"YAFdJksXcAk,0","Libre Baskerville":"YACgEUFdPdA,0","Manrope":"YAHO2b2feC4,0","Merriweather":"YACgEXvHxxs,0","Montserrat":"YADLjI9qxTA,0","Nunito":"YACgEX8C5Gg,0","Oleo Script":"YACgEQQ14jI,0","Phantom Sans":"YAHO2E8Pb88,0","Playfair Display":"YACgEYmuCJE,0","Poppins":"YAFdJjbTu24,1","Press Start 2P":"YAFyGr-8pmQ,0","Quicksand":"YADWjpfPmdk,0","Raleway":"YACgEVg3xZg,0","Segoe UI":"YAHNdRD1Klw,0","Source Sans 3":"YAG4lO1Mj10,0","Spectral":"YAHO2rVUHIM,0","Times New Roman":"YAGzXW3gftg,0","Times":"YAGzXW3gftg,0","Ubuntu":"YACgERDU--Q,0","Work Sans":"YAGXhLOKv44,0","Yellowtail":"YACgEYG4kG4,0","ui-monospace":"YADlN8CFZ8Q,0","ui-sans-serif":"YACkoN-xg4g,0"}}');</script><script src="/_sdk/cc55fa1b533807c5.telemetry_sdk.js" integrity="sha512-vW7a0U63BNWyPgkdgvdYnLKXjx/E1nZSXBT1dQT4DrVBh7k4yi55jDX0CvlS9/4Dcuktj9yKi+hEm0rq9hBn1w=="></script>
+<html lang="en">
+<head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Interactive Greeting Board</title>
+  <title>Places in Hong Kong</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&amp;display=swap" rel="stylesheet">
-  <script src="/_sdk/8b7c4717bafbcf62.editing_sdk.js" integrity="sha512-/t3Rjm/TVHx0TUFevsNeqgNF0PQm8F5l+hyiCjrHCLbsauhvNMY9XpbPM3BPm27R9/KnzXCuMA6HMwrgyWM8WQ=="></script>
   <style>
     :root {
       --marker-red: #d71920;
@@ -29,6 +29,7 @@
       overflow: hidden;
       font-family: "DM Sans", sans-serif;
       background-color: #f3eee8;
+      background-image: url("./images/background.png");
       background-position: center;
       background-repeat: no-repeat;
       background-size: cover;
@@ -199,53 +200,51 @@
     }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.577.0/dist/umd/lucide.min.js" type="text/javascript"></script>
-  <script src="/_sdk/d87b80b4433bab6b.data_sdk.js" type="text/javascript" integrity="sha512-JKynAZ3aIUkxrmu1y4Enod3283hZsIIaBhOwwM+go3QT3MqYMvKrAZczNoL1jjjyzi8i7cD2EiXs1sP4BPwZ3g=="></script>
-  <script src="/_sdk/ad00ce977a5c2ece.resizing_sdk.js" type="text/javascript" integrity="sha512-bog4wGkBPPOhR0ljLsI2R9w0aS7AHt6iC4MNxsBmTL7IysBG15pB3x/bOQf//NXwh2kdtoBZiW6QfBMagGYlWA=="></script>
- </head>
- <body data-template-id="__page-root" class="w-full">
+</head>
+<body class="w-full">
   <main class="board-stage" aria-label="Image greeting board">
-   <article class="marker marker-a" tabindex="0" aria-label="Image marker one">
-    <div class="marker-frame">
-     <img data-template-id="card-img-0" class="canva-image" loading="lazy" src="canva://MAHUq2RDe9I/1" alt="images.jpg">
-     <p data-template-id="card-label-0" class="marker-label canva-text" style="color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 16px;">The Big Buddha</p>
-    </div>
-   </article>
-   <article class="marker marker-b" tabindex="0" aria-label="Image marker two">
-    <div class="marker-frame">
-     <img data-template-id="card-img-1" class="canva-image" loading="lazy" src="canva://MAHUqzeW_Yc/1" alt="images.jpg">
-     <p data-template-id="card-label-1" class="marker-label canva-text" style="color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 16px;">Tin Shui Wai Wetland Park</p>
-    </div>
-   </article>
-   <article class="marker marker-c" tabindex="0" aria-label="Image marker three">
-    <div class="marker-frame">
-     <img data-template-id="card-img-2" class="canva-image" loading="lazy" src="canva://MAHUrUdvNJk/1" alt="images.jpg">
-     <p data-template-id="card-label-2" class="marker-label canva-text" style="color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 16px;">TWSCPS</p>
-    </div>
-   </article>
-   <article class="marker marker-d" tabindex="0" aria-label="Image marker four">
-    <div class="marker-frame">
-     <img data-template-id="card-img-3" class="canva-image" loading="lazy" src="canva://MAHUq1ClFlk/1" alt="images.jpg">
-     <p data-template-id="card-label-3" class="marker-label canva-text" style="color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 16px;">Hong Kong Geopark</p>
-    </div>
-   </article>
-   <article class="marker marker-e" tabindex="0" aria-label="Image marker five">
-    <div class="marker-frame">
-     <img data-template-id="card-img-4" class="canva-image" loading="lazy" src="canva://MAHUqy0A_gc/1" alt="images.jpg">
-     <p data-template-id="card-label-4" class="marker-label canva-text" style="color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 16px;">Golden Bauhinia Square</p>
-    </div>
-   </article>
-   <article class="marker marker-f" tabindex="0" aria-label="Image marker six">
-    <div class="marker-frame">
-     <img data-template-id="card-img-5" class="canva-image" loading="lazy" src="canva://MAHUqy83Zlo/1" alt="ff7a05485186d44cd60c5a02f481f655.webp">
-     <p data-template-id="card-label-5" class="marker-label canva-text" style="color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 16px;">Tai O</p>
-    </div>
-   </article>
-   <article class="marker marker-g" tabindex="0" aria-label="Image marker seven">
-    <div class="marker-frame">
-     <img data-template-id="card-img-6" class="canva-image" loading="lazy" src="canva://MAHUqwYkAIw/1" alt="images.jpg">
-     <p data-template-id="card-label-6" class="marker-label canva-text" style="color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 16px;">The Peak</p>
-    </div>
-   </article>
+    <article class="marker marker-a" tabindex="0" aria-label="Image marker one">
+      <div class="marker-frame">
+        <img class="canva-image" loading="lazy" src="./images/big-buddha.jpg" alt="The Big Buddha">
+        <p class="marker-label canva-text" style="color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 16px;">The Big Buddha</p>
+      </div>
+    </article>
+    <article class="marker marker-b" tabindex="0" aria-label="Image marker two">
+      <div class="marker-frame">
+        <img class="canva-image" loading="lazy" src="./images/wetland-park.jpg" alt="Tin Shui Wai Wetland Park">
+        <p class="marker-label canva-text" style="color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 16px;">Tin Shui Wai Wetland Park</p>
+      </div>
+    </article>
+    <article class="marker marker-c" tabindex="0" aria-label="Image marker three">
+      <div class="marker-frame">
+        <img class="canva-image" loading="lazy" src="./images/twscps.jpg" alt="TWSCPS">
+        <p class="marker-label canva-text" style="color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 16px;">TWSCPS</p>
+      </div>
+    </article>
+    <article class="marker marker-d" tabindex="0" aria-label="Image marker four">
+      <div class="marker-frame">
+        <img class="canva-image" loading="lazy" src="./images/geopark.jpg" alt="Hong Kong Geopark">
+        <p class="marker-label canva-text" style="color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 16px;">Hong Kong Geopark</p>
+      </div>
+    </article>
+    <article class="marker marker-e" tabindex="0" aria-label="Image marker five">
+      <div class="marker-frame">
+        <img class="canva-image" loading="lazy" src="./images/golden-bauhinia.jpg" alt="Golden Bauhinia Square">
+        <p class="marker-label canva-text" style="color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 16px;">Golden Bauhinia Square</p>
+      </div>
+    </article>
+    <article class="marker marker-f" tabindex="0" aria-label="Image marker six">
+      <div class="marker-frame">
+        <img class="canva-image" loading="lazy" src="./images/tai-o.jpg" alt="Tai O">
+        <p class="marker-label canva-text" style="color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 16px;">Tai O</p>
+      </div>
+    </article>
+    <article class="marker marker-g" tabindex="0" aria-label="Image marker seven">
+      <div class="marker-frame">
+        <img class="canva-image" loading="lazy" src="./images/the-peak.jpg" alt="The Peak">
+        <p class="marker-label canva-text" style="color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 16px;">The Peak</p>
+      </div>
+    </article>
   </main>
   <script>
     (() => {
@@ -383,5 +382,5 @@
       window.addEventListener("pointercancel", stopInteraction, true);
     })();
   </script>
- 
-</body></html>
+</body>
+</html>
