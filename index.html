@@ -170,7 +170,7 @@
 
       .board-stage {
         min-height: calc(100 * min(var(--vh, 1vh), 1vh));
-        display: grid;
+        display: block;
         grid-template-columns: repeat(2, minmax(0, 1fr));
         align-content: center;
         gap: 1.7rem 1.2rem;
@@ -180,7 +180,7 @@
 
       .marker {
         width: min(25vw, 108px);
-        position: relative;
+        position: absolute;
         inset: auto;
         justify-self: center;
       }
