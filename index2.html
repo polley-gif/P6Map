@@ -1,1 +1,486 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places in Hong Kong</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&amp;display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --marker-red: #d71920;
+      --marker-shadow: rgba(35, 22, 20, 0.22);
+      --vh: 1vh;
+    }
 
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+    }
+
+    body {
+      min-height: calc(100 * min(var(--vh, 1vh), 1vh));
+      font-family: "DM Sans", sans-serif;
+      background-color: #f3eee8;
+      background-image: url("./images/background.png");
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: cover;
+      position: relative;
+    }
+
+    .board-stage {
+      width: 100%;
+      height: 100vh;
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
+      background-color: transparent;
+    }
+
+    /* SVG Overlay for drawing path */
+    .journey-overlay {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .marker {
+      position: absolute;
+      width: clamp(55px, 7vw, 95px);
+      aspect-ratio: 1 / 1.18;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      filter: drop-shadow(0 12px 12px var(--marker-shadow));
+      animation: settle-in 620ms cubic-bezier(.2, .8, .2, 1) both;
+      cursor: pointer;
+      user-select: none;
+      will-change: transform, left, top;
+      transition: transform 0.2s ease, filter 0.2s ease;
+      z-index: 20;
+    }
+
+    .marker.selected {
+      transform: scale(1.18) !important;
+      z-index: 30;
+      filter: drop-shadow(0 0 12px rgba(215, 25, 32, 0.8)) drop-shadow(0 12px 12px var(--marker-shadow));
+    }
+
+    .marker.selected .marker-frame {
+      border-color: #10b981;
+      box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.3);
+    }
+
+    .marker-frame {
+      width: 100%;
+      aspect-ratio: 1;
+      overflow: hidden;
+      border: 3px solid var(--marker-red);
+      border-radius: 50%;
+      background: #fff7ed;
+      position: relative;
+      z-index: 1;
+    }
+
+    .marker-frame img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+      border-radius: 50%;
+      transition: transform 300ms ease;
+    }
+
+    .marker::after {
+      content: "";
+      position: absolute;
+      z-index: -1;
+      width: 38%;
+      aspect-ratio: 1;
+      left: 50%;
+      bottom: 1.8%;
+      transform: translateX(-50%) rotate(45deg);
+      background: var(--marker-red);
+      border-right: 3px solid var(--marker-red);
+      border-bottom: 3px solid var(--marker-red);
+    }
+
+    .marker.selected::after {
+      background: #10b981;
+      border-color: #10b981;
+    }
+
+    .marker-label {
+      position: absolute;
+      z-index: 3;
+      left: 50%;
+      bottom: 12%;
+      transform: translateX(-50%);
+      width: 90%;
+      margin: 0;
+      padding: 0.2rem 0.35rem;
+      border-radius: 0.3rem;
+      background: rgba(28, 25, 23, 0.88);
+      color: #ffffff;
+      font-size: clamp(0.55rem, 0.9vw, 0.75rem);
+      font-weight: 700;
+      line-height: 1.1;
+      text-align: center;
+      pointer-events: none;
+    }
+
+    /* Clear Button */
+    .clear-btn {
+      position: absolute;
+      top: 1.5rem;
+      left: 1.5rem;
+      z-index: 40;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.75rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .clear-btn:hover {
+      background: #ffffff;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+    }
+
+    /* Bottom Transport Toggle Pane */
+    .bottom-pane {
+      position: absolute;
+      bottom: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 40;
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      padding: 0.4rem;
+      border-radius: 9999px;
+      display: flex;
+      gap: 0.5rem;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    .mode-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.6rem 1.2rem;
+      border-radius: 9999px;
+      border: none;
+      background: transparent;
+      color: #57534e;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .mode-btn.active {
+      background: #10b981;
+      color: white;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    @keyframes settle-in {
+      from {
+        opacity: 0;
+        scale: 0.72;
+      }
+      to {
+        opacity: 1;
+        scale: 1;
+      }
+    }
+  </style>
+</head>
+<body class="w-full">
+
+  <!-- Clear Journey Top-Left Control -->
+  <button id="clear-journey" class="clear-btn" aria-label="Clear journey">
+    <i data-lucide="x" class="w-6 h-6 text-stone-800"></i>
+    <span class="text-xs font-bold text-stone-700 mt-0.5">clear journey</span>
+  </button>
+
+  <main class="board-stage" aria-label="Hong Kong Map Stage">
+    <!-- SVG layer for journey path and labels -->
+    <svg class="journey-overlay" id="journey-svg">
+      <defs>
+        <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000000" flood-opacity="0.3"/>
+        </filter>
+      </defs>
+      <!-- Path line -->
+      <path id="route-path" d="" fill="none" stroke="#10b981" stroke-width="5" stroke-dasharray="8 6" stroke-linecap="round"/>
+      <!-- Text overlays along the journey path -->
+      <g id="route-labels" filter="url(#glow)">
+        <text id="distance-text" fill="#10b981" font-weight="700" font-size="14" text-anchor="middle"></text>
+        <text id="time-text" fill="#27272a" font-weight="700" font-size="13" text-anchor="middle"></text>
+      </g>
+    </svg>
+
+    <!-- Real-world Placed Markers -->
+    <article class="marker" data-id="wetland-park" data-lat="22.4716" data-lng="114.0088" style="top: 10%; left: 36%;">
+      <div class="marker-frame">
+        <img src="./images/wetland-park.jpg" alt="Tin Shui Wai Wetland Park">
+        <p class="marker-label">Wetland Park</p>
+      </div>
+    </article>
+
+    <article class="marker" data-id="geopark" data-lat="22.3642" data-lng="114.3712" style="top: 32%; left: 82%;">
+      <div class="marker-frame">
+        <img src="./images/geopark.jpg" alt="Hong Kong Geopark">
+        <p class="marker-label">HK Geopark</p>
+      </div>
+    </article>
+
+    <article class="marker" data-id="twscps" data-lat="22.3713" data-lng="114.1142" style="top: 38%; left: 45%;">
+      <div class="marker-frame">
+        <img src="./images/twscps.jpg" alt="TWSCPS">
+        <p class="marker-label">TWSCPS</p>
+      </div>
+    </article>
+
+    <article class="marker" data-id="golden-bauhinia" data-lat="22.2835" data-lng="114.1736" style="top: 58%; left: 58%;">
+      <div class="marker-frame">
+        <img src="./images/golden-bauhinia.jpg" alt="Golden Bauhinia Square">
+        <p class="marker-label">Golden Bauhinia</p>
+      </div>
+    </article>
+
+    <article class="marker" data-id="the-peak" data-lat="22.2710" data-lng="114.1499" style="top: 65%; left: 52%;">
+      <div class="marker-frame">
+        <img src="./images/the-peak.jpg" alt="The Peak">
+        <p class="marker-label">The Peak</p>
+      </div>
+    </article>
+
+    <article class="marker" data-id="big-buddha" data-lat="22.2540" data-lng="113.9050" style="top: 72%; left: 18%;">
+      <div class="marker-frame">
+        <img src="./images/big-buddha.jpg" alt="The Big Buddha">
+        <p class="marker-label">The Big Buddha</p>
+      </div>
+    </article>
+
+    <article class="marker" data-id="tai-o" data-lat="22.2522" data-lng="113.8631" style="top: 73%; left: 8%;">
+      <div class="marker-frame">
+        <img src="./images/tai-o.jpg" alt="Tai O">
+        <p class="marker-label">Tai O</p>
+      </div>
+    </article>
+  </main>
+
+  <!-- Transport Mode Selector -->
+  <div class="bottom-pane">
+    <button class="mode-btn active" data-mode="walk">
+      <i data-lucide="footprints" class="w-4 h-4"></i>
+      <span>Walk</span>
+    </button>
+    <button class="mode-btn" data-mode="train">
+      <i data-lucide="train" class="w-4 h-4"></i>
+      <span>Train</span>
+    </button>
+    <button class="mode-btn" data-mode="car">
+      <i data-lucide="car" class="w-4 h-4"></i>
+      <span>Car</span>
+    </button>
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    // Map bounds (Approximate Lat/Lng box covering HK region)
+    const MAP_BOUNDS = {
+      north: 22.5600,
+      south: 22.1500,
+      west: 113.8000,
+      east: 114.4500
+    };
+
+    let selectedMode = 'walk';
+    let selectedMarkers = [];
+
+    // Mode Speeds (mph) & Winding Multipliers
+    const MODE_CONFIG = {
+      walk: { speed: 3, factor: 1.25 },
+      train: { speed: 30, factor: 1.15 },
+      car: { speed: 25, factor: 1.35 }
+    };
+
+    // Initialize position based on real coordinates
+    function positionMarkersRealWorld() {
+      const stage = document.querySelector('.board-stage');
+      const markers = document.querySelectorAll('.marker');
+      const width = stage.clientWidth;
+      const height = stage.clientHeight;
+
+      markers.forEach(marker => {
+        const lat = parseFloat(marker.dataset.lat);
+        const lng = parseFloat(marker.dataset.lng);
+
+        const xPct = (lng - MAP_BOUNDS.west) / (MAP_BOUNDS.east - MAP_BOUNDS.west);
+        const yPct = (MAP_BOUNDS.north - lat) / (MAP_BOUNDS.north - MAP_BOUNDS.south);
+
+        const x = xPct * (width - 100) + 20;
+        const y = yPct * (height - 120) + 40;
+
+        marker.style.left = `${x}px`;
+        marker.style.top = `${y}px`;
+      });
+    }
+
+    // Haversine distance formula (in Miles)
+    function calculateDistanceMiles(lat1, lon1, lat2, lon2) {
+      const R = 3958.8; // Radius of earth in miles
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = 
+        Math.sin(dLat/2) * Math.sin(dLat/2) +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+        Math.sin(dLon/2) * Math.sin(dLon/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      return R * c;
+    }
+
+    // Get anchor center of marker pin
+    function getMarkerCenter(marker) {
+      const rect = marker.getBoundingClientRect();
+      return {
+        x: rect.left + rect.width / 2,
+        y: rect.bottom - (rect.height * 0.1) // Tip of the marker pin
+      };
+    }
+
+    // Draw route and calculate distance/time
+    function updateRoute() {
+      const routePath = document.getElementById('route-path');
+      const distText = document.getElementById('distance-text');
+      const timeText = document.getElementById('time-text');
+
+      if (selectedMarkers.length < 2) {
+        routePath.setAttribute('d', '');
+        distText.textContent = '';
+        timeText.textContent = '';
+        return;
+      }
+
+      const [m1, m2] = selectedMarkers;
+      const p1 = getMarkerCenter(m1);
+      const p2 = getMarkerCenter(m2);
+
+      // Create slight curved path
+      const dx = p2.x - p1.x;
+      const dy = p2.y - p1.y;
+      const cx = (p1.x + p2.x) / 2 - dy * 0.15;
+      const cy = (p1.y + p2.y) / 2 + dx * 0.15;
+
+      const pathData = `M ${p1.x} ${p1.y} Q ${cx} ${cy} ${p2.x} ${p2.y}`;
+      routePath.setAttribute('d', pathData);
+
+      // Calculate real-world metrics
+      const lat1 = parseFloat(m1.dataset.lat);
+      const lon1 = parseFloat(m1.dataset.lng);
+      const lat2 = parseFloat(m2.dataset.lat);
+      const lon2 = parseFloat(m2.dataset.lng);
+
+      const directDist = calculateDistanceMiles(lat1, lon1, lat2, lon2);
+      const config = MODE_CONFIG[selectedMode];
+      const estimatedDist = directDist * config.factor;
+      const roundedDist = Math.round(estimatedDist);
+
+      // Format distance
+      if (roundedDist <= 1) {
+        distText.textContent = "less than 1 mile";
+      } else {
+        distText.textContent = `around ${roundedDist} miles`;
+      }
+
+      // Calculate travel time
+      const timeHours = estimatedDist / config.speed;
+      const totalMinutes = Math.round(timeHours * 60);
+      const hrs = Math.floor(totalMinutes / 60);
+      const mins = totalMinutes % 60;
+
+      if (hrs > 0) {
+        timeText.textContent = `around ${hrs} hour${hrs > 1 ? 's' : ''}${mins > 0 ? ` and ${mins} minute${mins > 1 ? 's' : ''}` : ''}`;
+      } else {
+        timeText.textContent = `around ${Math.max(1, mins)} minutes`;
+      }
+
+      // Position labels at center of curve
+      const midX = (p1.x + 2 * cx + p2.x) / 4;
+      const midY = (p1.y + 2 * cy + p2.y) / 4;
+
+      distText.setAttribute('x', midX);
+      distText.setAttribute('y', midY - 10);
+      timeText.setAttribute('x', midX);
+      timeText.setAttribute('y', midY + 16);
+    }
+
+    // Handle marker selections
+    document.querySelectorAll('.marker').forEach(marker => {
+      marker.addEventListener('click', () => {
+        if (selectedMarkers.includes(marker)) return;
+
+        if (selectedMarkers.length >= 2) {
+          selectedMarkers.forEach(m => m.classList.remove('selected'));
+          selectedMarkers = [];
+        }
+
+        marker.classList.add('selected');
+        selectedMarkers.push(marker);
+
+        updateRoute();
+      });
+    });
+
+    // Transport Mode Toggle Button logic
+    document.querySelectorAll('.mode-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedMode = btn.dataset.mode;
+        updateRoute();
+      });
+    });
+
+    // Clear Journey
+    document.getElementById('clear-journey').addEventListener('click', () => {
+      selectedMarkers.forEach(m => m.classList.remove('selected'));
+      selectedMarkers = [];
+      updateRoute();
+    });
+
+    // Setup viewport height and responsive layout adjustments
+    window.addEventListener('resize', () => {
+      positionMarkersRealWorld();
+      updateRoute();
+    });
+
+    // Initial positioning
+    positionMarkersRealWorld();
+  </script>
+</body>
+</html>
