@@ -56,14 +56,15 @@
       z-index: 50; /* Above markers */
     }
 
+    /* Marker Component Structure */
     .marker {
       position: absolute;
-      width: clamp(55px, 7vw, 95px);
-      aspect-ratio: 1 / 1.18;
+      width: clamp(65px, 8.5vw, 105px);
+      aspect-ratio: 1 / 1;
       padding: 0;
       border: 0;
       background: transparent;
-      filter: drop-shadow(0 12px 12px var(--marker-shadow));
+      filter: drop-shadow(0 10px 12px var(--marker-shadow));
       animation: settle-in 620ms cubic-bezier(.2, .8, .2, 1) both;
       cursor: pointer;
       user-select: none;
@@ -74,24 +75,24 @@
 
     .marker.selected {
       transform: scale(1.18) !important;
-      z-index: 30;
-      filter: drop-shadow(0 0 12px rgba(215, 25, 32, 0.8)) drop-shadow(0 12px 12px var(--marker-shadow));
+      z-index: 35;
+      filter: drop-shadow(0 0 14px rgba(215, 25, 32, 0.85)) drop-shadow(0 12px 12px var(--marker-shadow));
     }
 
     .marker.selected .marker-frame {
       border-color: #10b981;
-      box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.3);
+      box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.35);
     }
 
     .marker-frame {
       width: 100%;
-      aspect-ratio: 1;
+      height: 100%;
       overflow: hidden;
-      border: 3px solid var(--marker-red);
+      border: 3.5px solid var(--marker-red);
       border-radius: 50%;
       background: #fff7ed;
       position: relative;
-      z-index: 1;
+      z-index: 2;
     }
 
     .marker-frame img {
@@ -103,38 +104,83 @@
       transition: transform 300ms ease;
     }
 
-    .marker::after {
-      content: "";
+    /* Directional Pointer Arrow Shapes */
+    .marker-pin {
       position: absolute;
-      z-index: -1;
-      width: 38%;
+      z-index: 1;
+      width: 32%;
       aspect-ratio: 1;
-      left: 50%;
-      bottom: 1.8%;
-      transform: translateX(-50%) rotate(45deg);
       background: var(--marker-red);
+      transform: rotate(45deg);
+      transition: background-color 0.2s ease;
+    }
+
+    .marker.selected .marker-pin {
+      background: #10b981;
+    }
+
+    /* Orientations */
+    /* Point Down (Default) */
+    .marker[data-dir="down"] .marker-pin {
+      left: 50%;
+      bottom: -12%;
+      transform: translateX(-50%) rotate(45deg);
       border-right: 3px solid var(--marker-red);
       border-bottom: 3px solid var(--marker-red);
     }
+    .marker.selected[data-dir="down"] .marker-pin {
+      border-color: #10b981;
+    }
 
-    .marker.selected::after {
-      background: #10b981;
+    /* Point Up (The Peak) */
+    .marker[data-dir="up"] .marker-pin {
+      left: 50%;
+      top: -12%;
+      transform: translateX(-50%) rotate(45deg);
+      border-left: 3px solid var(--marker-red);
+      border-top: 3px solid var(--marker-red);
+    }
+    .marker.selected[data-dir="up"] .marker-pin {
+      border-color: #10b981;
+    }
+
+    /* Point Left-Down */
+    .marker[data-dir="down-left"] .marker-pin {
+      left: -5%;
+      bottom: 5%;
+      transform: rotate(45deg);
+      border-left: 3px solid var(--marker-red);
+      border-bottom: 3px solid var(--marker-red);
+    }
+    .marker.selected[data-dir="down-left"] .marker-pin {
+      border-color: #10b981;
+    }
+
+    /* Point Up-Left (Golden Bauhinia) */
+    .marker[data-dir="up-left"] .marker-pin {
+      left: -5%;
+      top: 5%;
+      transform: rotate(45deg);
+      border-left: 3px solid var(--marker-red);
+      border-top: 3px solid var(--marker-red);
+    }
+    .marker.selected[data-dir="up-left"] .marker-pin {
       border-color: #10b981;
     }
 
     .marker-label {
       position: absolute;
-      z-index: 3;
+      z-index: 4;
       left: 50%;
-      bottom: 12%;
+      bottom: 10%;
       transform: translateX(-50%);
-      width: 90%;
+      width: 92%;
       margin: 0;
-      padding: 0.2rem 0.35rem;
-      border-radius: 0.3rem;
-      background: rgba(28, 25, 23, 0.88);
+      padding: 0.25rem 0.35rem;
+      border-radius: 0.35rem;
+      background: rgba(20, 18, 16, 0.88);
       color: #ffffff;
-      font-size: clamp(0.55rem, 0.9vw, 0.75rem);
+      font-size: clamp(0.55rem, 0.85vw, 0.72rem);
       font-weight: 700;
       line-height: 1.1;
       text-align: center;
@@ -262,50 +308,60 @@
       </g>
     </svg>
 
-    <!-- Real-world Placed Markers -->
-    <article class="marker" data-id="wetland-park" data-lat="22.4716" data-lng="114.0088">
+    <!-- Real-world Map Placed Markers with Custom Pointer Orientations -->
+    <article class="marker" data-id="wetland-park" data-lat="22.4716" data-lng="114.0088" data-dir="down">
+      <div class="marker-pin"></div>
       <div class="marker-frame">
         <img src="./images/wetland-park.jpg" alt="Tin Shui Wai Wetland Park">
         <p class="marker-label">Wetland Park</p>
       </div>
     </article>
 
-    <article class="marker" data-id="geopark" data-lat="22.3642" data-lng="114.3712">
+    <article class="marker" data-id="geopark" data-lat="22.3642" data-lng="114.3712" data-dir="down">
+      <div class="marker-pin"></div>
       <div class="marker-frame">
         <img src="./images/geopark.jpg" alt="Hong Kong Geopark">
         <p class="marker-label">HK Geopark</p>
       </div>
     </article>
 
-    <article class="marker" data-id="twscps" data-lat="22.3713" data-lng="114.1142">
+    <!-- TWSCPS (Wong Tai Sin / Diamond Hill) -->
+    <article class="marker" data-id="twscps" data-lat="22.3468" data-lng="114.2020" data-dir="down">
+      <div class="marker-pin"></div>
       <div class="marker-frame">
         <img src="./images/twscps.jpg" alt="TWSCPS">
         <p class="marker-label">TWSCPS</p>
       </div>
     </article>
 
-    <article class="marker" data-id="golden-bauhinia" data-lat="22.2835" data-lng="114.1736">
+    <!-- Golden Bauhinia Square (Wan Chai) -->
+    <article class="marker" data-id="golden-bauhinia" data-lat="22.2835" data-lng="114.1736" data-dir="up-left">
+      <div class="marker-pin"></div>
       <div class="marker-frame">
         <img src="./images/golden-bauhinia.jpg" alt="Golden Bauhinia Square">
         <p class="marker-label">Golden Bauhinia</p>
       </div>
     </article>
 
-    <article class="marker" data-id="the-peak" data-lat="22.2710" data-lng="114.1499">
+    <!-- The Peak (Oriented Upwards, positioned underneath location point) -->
+    <article class="marker" data-id="the-peak" data-lat="22.2710" data-lng="114.1499" data-dir="up">
+      <div class="marker-pin"></div>
       <div class="marker-frame">
         <img src="./images/the-peak.jpg" alt="The Peak">
         <p class="marker-label">The Peak</p>
       </div>
     </article>
 
-    <article class="marker" data-id="big-buddha" data-lat="22.2540" data-lng="113.9050">
+    <article class="marker" data-id="big-buddha" data-lat="22.2540" data-lng="113.9050" data-dir="down">
+      <div class="marker-pin"></div>
       <div class="marker-frame">
         <img src="./images/big-buddha.jpg" alt="The Big Buddha">
         <p class="marker-label">The Big Buddha</p>
       </div>
     </article>
 
-    <article class="marker" data-id="tai-o" data-lat="22.2522" data-lng="113.8631">
+    <article class="marker" data-id="tai-o" data-lat="22.2522" data-lng="113.8631" data-dir="down-left">
+      <div class="marker-pin"></div>
       <div class="marker-frame">
         <img src="./images/tai-o.jpg" alt="Tai O">
         <p class="marker-label">Tai O</p>
@@ -350,7 +406,7 @@
       train: 'driving' // Trains fallback to realistic transit road corridors
     };
 
-    // Real-world Lat/Lng to Screen Pixel coordinate mapping
+    // Lat/Lng to Screen Pixel coordinate mapping
     function latLngToScreen(lat, lng) {
       const stage = document.querySelector('.board-stage');
       const width = stage.clientWidth;
@@ -360,29 +416,58 @@
       const yPct = (MAP_BOUNDS.north - lat) / (MAP_BOUNDS.north - MAP_BOUNDS.south);
 
       return {
-        x: xPct * (width - 120) + 60,
-        y: yPct * (height - 140) + 70
+        x: xPct * (width - 140) + 70,
+        y: yPct * (height - 160) + 80
       };
     }
 
+    // Position Markers on Screen with Orientation Offset Adjustments
     function positionMarkersRealWorld() {
       const markers = document.querySelectorAll('.marker');
       markers.forEach(marker => {
         const lat = parseFloat(marker.dataset.lat);
         const lng = parseFloat(marker.dataset.lng);
+        const dir = marker.dataset.dir || 'down';
         const pos = latLngToScreen(lat, lng);
+        
+        const w = marker.offsetWidth || 85;
+        const h = marker.offsetHeight || 85;
 
-        marker.style.left = `${pos.x - 30}px`;
-        marker.style.top = `${pos.y - 60}px`;
+        let left = pos.x - (w / 2);
+        let top = pos.y - (h / 2);
+
+        // Adjust frame position based on directional pin orientation
+        if (dir === 'down') {
+          top = pos.y - h;
+        } else if (dir === 'up') {
+          top = pos.y;
+        } else if (dir === 'down-left') {
+          left = pos.x;
+          top = pos.y - h;
+        } else if (dir === 'up-left') {
+          left = pos.x;
+          top = pos.y;
+        }
+
+        marker.style.left = `${left}px`;
+        marker.style.top = `${top}px`;
       });
     }
 
+    // Get exact visual point tip for path drawing
     function getMarkerTip(marker) {
       const rect = marker.getBoundingClientRect();
-      return {
-        x: rect.left + rect.width / 2,
-        y: rect.bottom - (rect.height * 0.08)
-      };
+      const dir = marker.dataset.dir || 'down';
+
+      if (dir === 'up') {
+        return { x: rect.left + rect.width / 2, y: rect.top };
+      } else if (dir === 'down-left') {
+        return { x: rect.left, y: rect.bottom };
+      } else if (dir === 'up-left') {
+        return { x: rect.left, y: rect.top };
+      }
+      // Default 'down'
+      return { x: rect.left + rect.width / 2, y: rect.bottom };
     }
 
     // Haversine calculation (Miles)
@@ -480,7 +565,7 @@
       const p1 = getMarkerTip(m1);
       const p2 = getMarkerTip(m2);
 
-      // Attempt to load real-world trajectory path
+      // Fetch real-world trajectory path
       const realRoute = await fetchRealRoute(lat1, lon1, lat2, lon2, selectedMode);
 
       let pathD = "";
@@ -499,7 +584,7 @@
           pathD += ` L ${screenPoints[i].x} ${screenPoints[i].y}`;
         }
 
-        // Get mid point along trajectory line
+        // Mid point along trajectory line
         const midIdx = Math.floor(screenPoints.length / 2);
         midPoint = screenPoints[midIdx];
 
