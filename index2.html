@@ -10,73 +10,78 @@
   <style>
     :root {
       --marker-red: #d71920;
-      --marker-shadow: rgba(35, 22, 20, 0.22);
-      --vh: 1vh;
+      --marker-shadow: rgba(35, 22, 20, 0.28);
     }
 
     * {
       box-sizing: border-box;
     }
 
-    html,
-    body {
+    html, body {
       width: 100%;
       height: 100%;
       margin: 0;
+      padding: 0;
       overflow: hidden;
+      background-color: #0d2838;
+      font-family: "DM Sans", sans-serif;
     }
 
-    body {
-      min-height: calc(100 * min(var(--vh, 1vh), 1vh));
-      font-family: "DM Sans", sans-serif;
-      background-color: #f3eee8;
-      background-image: url("./images/background.png");
-      background-position: center;
-      background-repeat: no-repeat;
-      background-size: cover;
+    /* Fixed-aspect Container ensuring identical positions on ALL screen sizes */
+    .viewport-wrapper {
       position: relative;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #0c2332;
     }
 
     .board-stage {
-      width: 100%;
-      height: 100vh;
       position: relative;
-      overflow: hidden;
+      width: 100%;
+      max-width: 100vw;
+      max-height: 100vh;
+      aspect-ratio: 16 / 10;
+      background-image: url("./images/background.png");
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: contain;
       isolation: isolate;
-      background-color: transparent;
+      overflow: hidden;
     }
 
-    /* SVG Overlay for drawing path and high-priority labels */
+    /* Overlay SVG for Lines & Labels */
     .journey-overlay {
       position: absolute;
       inset: 0;
       width: 100%;
       height: 100%;
       pointer-events: none;
-      z-index: 50; /* Above markers */
+      z-index: 50;
     }
 
-    /* Marker Component Structure */
+    /* Base Marker Style */
     .marker {
       position: absolute;
-      width: clamp(65px, 8.5vw, 105px);
+      width: clamp(52px, 6.5vw, 92px);
       aspect-ratio: 1 / 1;
       padding: 0;
       border: 0;
       background: transparent;
-      filter: drop-shadow(0 10px 12px var(--marker-shadow));
-      animation: settle-in 620ms cubic-bezier(.2, .8, .2, 1) both;
+      filter: drop-shadow(0 8px 10px var(--marker-shadow));
       cursor: pointer;
       user-select: none;
-      will-change: transform, left, top;
       transition: transform 0.2s ease, filter 0.2s ease;
       z-index: 20;
+      /* Position offset using percentages based on direction pin tip */
+      transform: translate(-50%, -100%);
     }
 
     .marker.selected {
-      transform: scale(1.18) !important;
       z-index: 35;
-      filter: drop-shadow(0 0 14px rgba(215, 25, 32, 0.85)) drop-shadow(0 12px 12px var(--marker-shadow));
+      filter: drop-shadow(0 0 14px rgba(215, 25, 32, 0.9)) drop-shadow(0 10px 10px var(--marker-shadow));
     }
 
     .marker.selected .marker-frame {
@@ -101,17 +106,15 @@
       display: block;
       object-fit: cover;
       border-radius: 50%;
-      transition: transform 300ms ease;
     }
 
-    /* Directional Pointer Arrow Shapes */
+    /* Directional Pointer Arrows */
     .marker-pin {
       position: absolute;
       z-index: 1;
-      width: 32%;
+      width: 30%;
       aspect-ratio: 1;
       background: var(--marker-red);
-      transform: rotate(45deg);
       transition: background-color 0.2s ease;
     }
 
@@ -119,8 +122,10 @@
       background: #10b981;
     }
 
-    /* Orientations */
-    /* Point Down (Default) */
+    /* DOWN (Default: Tip is bottom center) */
+    .marker[data-dir="down"] {
+      transform: translate(-50%, -100%);
+    }
     .marker[data-dir="down"] .marker-pin {
       left: 50%;
       bottom: -12%;
@@ -132,7 +137,10 @@
       border-color: #10b981;
     }
 
-    /* Point Up (The Peak) */
+    /* UP (The Peak: Marker sits BELOW location, Tip is top center) */
+    .marker[data-dir="up"] {
+      transform: translate(-50%, 0%);
+    }
     .marker[data-dir="up"] .marker-pin {
       left: 50%;
       top: -12%;
@@ -144,22 +152,13 @@
       border-color: #10b981;
     }
 
-    /* Point Left-Down */
-    .marker[data-dir="down-left"] .marker-pin {
-      left: -5%;
-      bottom: 5%;
-      transform: rotate(45deg);
-      border-left: 3px solid var(--marker-red);
-      border-bottom: 3px solid var(--marker-red);
+    /* UP-LEFT (Golden Bauhinia: Tip is top-left) */
+    .marker[data-dir="up-left"] {
+      transform: translate(0%, 0%);
     }
-    .marker.selected[data-dir="down-left"] .marker-pin {
-      border-color: #10b981;
-    }
-
-    /* Point Up-Left (Golden Bauhinia) */
     .marker[data-dir="up-left"] .marker-pin {
-      left: -5%;
-      top: 5%;
+      left: -6%;
+      top: 6%;
       transform: rotate(45deg);
       border-left: 3px solid var(--marker-red);
       border-top: 3px solid var(--marker-red);
@@ -168,19 +167,34 @@
       border-color: #10b981;
     }
 
+    /* DOWN-LEFT (Tai O: Tip is bottom-left) */
+    .marker[data-dir="down-left"] {
+      transform: translate(0%, -100%);
+    }
+    .marker[data-dir="down-left"] .marker-pin {
+      left: -6%;
+      bottom: 6%;
+      transform: rotate(45deg);
+      border-left: 3px solid var(--marker-red);
+      border-bottom: 3px solid var(--marker-red);
+    }
+    .marker.selected[data-dir="down-left"] .marker-pin {
+      border-color: #10b981;
+    }
+
     .marker-label {
       position: absolute;
       z-index: 4;
       left: 50%;
-      bottom: 10%;
+      bottom: 8%;
       transform: translateX(-50%);
-      width: 92%;
+      width: 90%;
       margin: 0;
-      padding: 0.25rem 0.35rem;
-      border-radius: 0.35rem;
+      padding: 0.2rem 0.3rem;
+      border-radius: 0.3rem;
       background: rgba(20, 18, 16, 0.88);
       color: #ffffff;
-      font-size: clamp(0.55rem, 0.85vw, 0.72rem);
+      font-size: clamp(0.5rem, 0.75vw, 0.7rem);
       font-weight: 700;
       line-height: 1.1;
       text-align: center;
@@ -190,8 +204,8 @@
     /* Clear Button */
     .clear-btn {
       position: absolute;
-      top: 1.5rem;
-      left: 1.5rem;
+      top: 1.25rem;
+      left: 1.25rem;
       z-index: 60;
       display: flex;
       flex-direction: column;
@@ -201,7 +215,7 @@
       border: 1px solid rgba(0, 0, 0, 0.1);
       padding: 0.5rem 0.75rem;
       border-radius: 0.75rem;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
       cursor: pointer;
       transition: all 0.2s ease;
     }
@@ -209,37 +223,36 @@
     .clear-btn:hover {
       background: #ffffff;
       transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
     }
 
-    /* Bottom Transport Toggle Pane */
+    /* Transport Pane */
     .bottom-pane {
       position: absolute;
-      bottom: 1.5rem;
+      bottom: 1.25rem;
       left: 50%;
       transform: translateX(-50%);
       z-index: 60;
       background: rgba(255, 255, 255, 0.92);
       backdrop-filter: blur(12px);
-      border: 1px solid rgba(0, 0, 0, 0.08);
-      padding: 0.4rem;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      padding: 0.35rem;
       border-radius: 9999px;
       display: flex;
-      gap: 0.5rem;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+      gap: 0.4rem;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
     }
 
     .mode-btn {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
-      padding: 0.6rem 1.2rem;
+      gap: 0.4rem;
+      padding: 0.5rem 1rem;
       border-radius: 9999px;
       border: none;
       background: transparent;
       color: #57534e;
       font-weight: 600;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       cursor: pointer;
       transition: all 0.2s ease;
     }
@@ -250,7 +263,7 @@
       box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
     }
 
-    /* SVG Label Text Styling: White text, Black outline, Glow effect */
+    /* SVG Label Text Styling */
     .route-text {
       font-family: "DM Sans", sans-serif;
       font-weight: 700;
@@ -262,212 +275,156 @@
       filter: drop-shadow(0px 2px 6px rgba(0,0,0,0.85));
     }
 
-    .route-text-sub {
-      font-size: 13px;
-    }
-
-    .route-text-main {
-      font-size: 15px;
-    }
-
-    @keyframes settle-in {
-      from {
-        opacity: 0;
-        scale: 0.72;
-      }
-      to {
-        opacity: 1;
-        scale: 1;
-      }
-    }
+    .route-text-sub { font-size: 13px; }
+    .route-text-main { font-size: 15px; }
   </style>
 </head>
-<body class="w-full">
+<body>
 
-  <!-- Clear Journey Control -->
-  <button id="clear-journey" class="clear-btn" aria-label="Clear journey">
-    <i data-lucide="x" class="w-6 h-6 text-stone-800"></i>
-    <span class="text-xs font-bold text-stone-700 mt-0.5">clear journey</span>
-  </button>
-
-  <main class="board-stage" aria-label="Hong Kong Map Stage">
-    <!-- SVG overlay sitting above all elements -->
-    <svg class="journey-overlay" id="journey-svg">
-      <defs>
-        <filter id="line-shadow" x="-20%" y="-20%" width="140%" height="140%">
-          <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000000" flood-opacity="0.5"/>
-        </filter>
-      </defs>
-      <!-- Trajectory Route Line -->
-      <path id="route-path" d="" fill="none" stroke="#10b981" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" filter="url(#line-shadow)"/>
+  <div class="viewport-wrapper">
+    <!-- Main Map Stage -->
+    <main class="board-stage" id="board-stage">
       
-      <!-- Topmost Label Group -->
-      <g id="route-labels">
-        <text id="distance-text" class="route-text route-text-main" text-anchor="middle"></text>
-        <text id="time-text" class="route-text route-text-sub" text-anchor="middle"></text>
-      </g>
-    </svg>
+      <!-- Clear Journey Button -->
+      <button id="clear-journey" class="clear-btn" aria-label="Clear journey">
+        <i data-lucide="x" class="w-5 h-5 text-stone-800"></i>
+        <span class="text-[10px] font-bold text-stone-700 mt-0.5">clear journey</span>
+      </button>
 
-    <!-- Real-world Map Placed Markers with Custom Pointer Orientations -->
-    <article class="marker" data-id="wetland-park" data-lat="22.4716" data-lng="114.0088" data-dir="down">
-      <div class="marker-pin"></div>
-      <div class="marker-frame">
-        <img src="./images/wetland-park.jpg" alt="Tin Shui Wai Wetland Park">
-        <p class="marker-label">Wetland Park</p>
+      <!-- Overlay SVG for Lines & Distance Labels -->
+      <svg class="journey-overlay" id="journey-svg">
+        <defs>
+          <filter id="line-shadow" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000000" flood-opacity="0.6"/>
+          </filter>
+        </defs>
+        <path id="route-path" d="" fill="none" stroke="#10b981" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" filter="url(#line-shadow)"/>
+        <g id="route-labels">
+          <text id="distance-text" class="route-text route-text-main" text-anchor="middle"></text>
+          <text id="time-text" class="route-text route-text-sub" text-anchor="middle"></text>
+        </g>
+      </svg>
+
+      <!-- Markers pinned using Exact Image Percentages (% left / % top) -->
+      
+      <!-- 1. Tin Shui Wai Wetland Park -->
+      <article class="marker" data-id="wetland-park" data-lat="22.4716" data-lng="114.0088" data-dir="down" style="left: 28%; top: 19%;">
+        <div class="marker-pin"></div>
+        <div class="marker-frame">
+          <img src="./images/wetland-park.jpg" alt="Tin Shui Wai Wetland Park">
+          <p class="marker-label">Wetland Park</p>
+        </div>
+      </article>
+
+      <!-- 2. Hong Kong Geopark -->
+      <article class="marker" data-id="geopark" data-lat="22.3642" data-lng="114.3712" data-dir="down" style="left: 84%; top: 41%;">
+        <div class="marker-pin"></div>
+        <div class="marker-frame">
+          <img src="./images/geopark.jpg" alt="Hong Kong Geopark">
+          <p class="marker-label">HK Geopark</p>
+        </div>
+      </article>
+
+      <!-- 3. TWSCPS -->
+      <article class="marker" data-id="twscps" data-lat="22.3468" data-lng="114.2020" data-dir="down" style="left: 55%; top: 45%;">
+        <div class="marker-pin"></div>
+        <div class="marker-frame">
+          <img src="./images/twscps.jpg" alt="TWSCPS">
+          <p class="marker-label">TWSCPS</p>
+        </div>
+      </article>
+
+      <!-- 4. Golden Bauhinia Square -->
+      <article class="marker" data-id="golden-bauhinia" data-lat="22.2835" data-lng="114.1736" data-dir="up-left" style="left: 51.5%; top: 59%;">
+        <div class="marker-pin"></div>
+        <div class="marker-frame">
+          <img src="./images/golden-bauhinia.jpg" alt="Golden Bauhinia Square">
+          <p class="marker-label">Golden Bauhinia</p>
+        </div>
+      </article>
+
+      <!-- 5. The Peak (Oriented UPWARDS below location point) -->
+      <article class="marker" data-id="the-peak" data-lat="22.2710" data-lng="114.1499" data-dir="up" style="left: 49.5%; top: 67%;">
+        <div class="marker-pin"></div>
+        <div class="marker-frame">
+          <img src="./images/the-peak.jpg" alt="The Peak">
+          <p class="marker-label">The Peak</p>
+        </div>
+      </article>
+
+      <!-- 6. Big Buddha -->
+      <article class="marker" data-id="big-buddha" data-lat="22.2540" data-lng="113.9050" data-dir="down" style="left: 17.5%; top: 66%;">
+        <div class="marker-pin"></div>
+        <div class="marker-frame">
+          <img src="./images/big-buddha.jpg" alt="The Big Buddha">
+          <p class="marker-label">The Big Buddha</p>
+        </div>
+      </article>
+
+      <!-- 7. Tai O -->
+      <article class="marker" data-id="tai-o" data-lat="22.2522" data-lng="113.8631" data-dir="down-left" style="left: 8%; top: 72%;">
+        <div class="marker-pin"></div>
+        <div class="marker-frame">
+          <img src="./images/tai-o.jpg" alt="Tai O">
+          <p class="marker-label">Tai O</p>
+        </div>
+      </article>
+
+      <!-- Transport Mode Selector -->
+      <div class="bottom-pane">
+        <button class="mode-btn active" data-mode="walk">
+          <i data-lucide="footprints" class="w-4 h-4"></i>
+          <span>Walk</span>
+        </button>
+        <button class="mode-btn" data-mode="train">
+          <i data-lucide="train" class="w-4 h-4"></i>
+          <span>Train</span>
+        </button>
+        <button class="mode-btn" data-mode="car">
+          <i data-lucide="car" class="w-4 h-4"></i>
+          <span>Car</span>
+        </button>
       </div>
-    </article>
 
-    <article class="marker" data-id="geopark" data-lat="22.3642" data-lng="114.3712" data-dir="down">
-      <div class="marker-pin"></div>
-      <div class="marker-frame">
-        <img src="./images/geopark.jpg" alt="Hong Kong Geopark">
-        <p class="marker-label">HK Geopark</p>
-      </div>
-    </article>
-
-    <!-- TWSCPS (Wong Tai Sin / Diamond Hill) -->
-    <article class="marker" data-id="twscps" data-lat="22.3468" data-lng="114.2020" data-dir="down">
-      <div class="marker-pin"></div>
-      <div class="marker-frame">
-        <img src="./images/twscps.jpg" alt="TWSCPS">
-        <p class="marker-label">TWSCPS</p>
-      </div>
-    </article>
-
-    <!-- Golden Bauhinia Square (Wan Chai) -->
-    <article class="marker" data-id="golden-bauhinia" data-lat="22.2835" data-lng="114.1736" data-dir="up-left">
-      <div class="marker-pin"></div>
-      <div class="marker-frame">
-        <img src="./images/golden-bauhinia.jpg" alt="Golden Bauhinia Square">
-        <p class="marker-label">Golden Bauhinia</p>
-      </div>
-    </article>
-
-    <!-- The Peak (Oriented Upwards, positioned underneath location point) -->
-    <article class="marker" data-id="the-peak" data-lat="22.2710" data-lng="114.1499" data-dir="up">
-      <div class="marker-pin"></div>
-      <div class="marker-frame">
-        <img src="./images/the-peak.jpg" alt="The Peak">
-        <p class="marker-label">The Peak</p>
-      </div>
-    </article>
-
-    <article class="marker" data-id="big-buddha" data-lat="22.2540" data-lng="113.9050" data-dir="down">
-      <div class="marker-pin"></div>
-      <div class="marker-frame">
-        <img src="./images/big-buddha.jpg" alt="The Big Buddha">
-        <p class="marker-label">The Big Buddha</p>
-      </div>
-    </article>
-
-    <article class="marker" data-id="tai-o" data-lat="22.2522" data-lng="113.8631" data-dir="down-left">
-      <div class="marker-pin"></div>
-      <div class="marker-frame">
-        <img src="./images/tai-o.jpg" alt="Tai O">
-        <p class="marker-label">Tai O</p>
-      </div>
-    </article>
-  </main>
-
-  <!-- Transport Mode Selector -->
-  <div class="bottom-pane">
-    <button class="mode-btn active" data-mode="walk">
-      <i data-lucide="footprints" class="w-4 h-4"></i>
-      <span>Walk</span>
-    </button>
-    <button class="mode-btn" data-mode="train">
-      <i data-lucide="train" class="w-4 h-4"></i>
-      <span>Train</span>
-    </button>
-    <button class="mode-btn" data-mode="car">
-      <i data-lucide="car" class="w-4 h-4"></i>
-      <span>Car</span>
-    </button>
+    </main>
   </div>
 
   <script>
     lucide.createIcons();
 
-    // Geographic Hong Kong bounding box
-    const MAP_BOUNDS = {
-      north: 22.5400,
-      south: 22.1800,
-      west: 113.8200,
-      east: 114.4000
-    };
-
     let selectedMode = 'walk';
     let selectedMarkers = [];
 
-    // OSRM Service profile mapping
     const OSRM_PROFILES = {
       walk: 'foot',
       car: 'driving',
-      train: 'driving' // Trains fallback to realistic transit road corridors
+      train: 'driving'
     };
 
-    // Lat/Lng to Screen Pixel coordinate mapping
-    function latLngToScreen(lat, lng) {
-      const stage = document.querySelector('.board-stage');
-      const width = stage.clientWidth;
-      const height = stage.clientHeight;
-
-      const xPct = (lng - MAP_BOUNDS.west) / (MAP_BOUNDS.east - MAP_BOUNDS.west);
-      const yPct = (MAP_BOUNDS.north - lat) / (MAP_BOUNDS.north - MAP_BOUNDS.south);
-
-      return {
-        x: xPct * (width - 140) + 70,
-        y: yPct * (height - 160) + 80
-      };
-    }
-
-    // Position Markers on Screen with Orientation Offset Adjustments
-    function positionMarkersRealWorld() {
-      const markers = document.querySelectorAll('.marker');
-      markers.forEach(marker => {
-        const lat = parseFloat(marker.dataset.lat);
-        const lng = parseFloat(marker.dataset.lng);
-        const dir = marker.dataset.dir || 'down';
-        const pos = latLngToScreen(lat, lng);
-        
-        const w = marker.offsetWidth || 85;
-        const h = marker.offsetHeight || 85;
-
-        let left = pos.x - (w / 2);
-        let top = pos.y - (h / 2);
-
-        // Adjust frame position based on directional pin orientation
-        if (dir === 'down') {
-          top = pos.y - h;
-        } else if (dir === 'up') {
-          top = pos.y;
-        } else if (dir === 'down-left') {
-          left = pos.x;
-          top = pos.y - h;
-        } else if (dir === 'up-left') {
-          left = pos.x;
-          top = pos.y;
-        }
-
-        marker.style.left = `${left}px`;
-        marker.style.top = `${top}px`;
-      });
-    }
-
-    // Get exact visual point tip for path drawing
+    // Dynamically calculate screen point for pin tip regardless of scale/resolution
     function getMarkerTip(marker) {
+      const stage = document.getElementById('board-stage').getBoundingClientRect();
       const rect = marker.getBoundingClientRect();
       const dir = marker.dataset.dir || 'down';
 
+      let tipX = rect.left + rect.width / 2;
+      let tipY = rect.bottom;
+
       if (dir === 'up') {
-        return { x: rect.left + rect.width / 2, y: rect.top };
-      } else if (dir === 'down-left') {
-        return { x: rect.left, y: rect.bottom };
+        tipX = rect.left + rect.width / 2;
+        tipY = rect.top;
       } else if (dir === 'up-left') {
-        return { x: rect.left, y: rect.top };
+        tipX = rect.left;
+        tipY = rect.top;
+      } else if (dir === 'down-left') {
+        tipX = rect.left;
+        tipY = rect.bottom;
       }
-      // Default 'down'
-      return { x: rect.left + rect.width / 2, y: rect.bottom };
+
+      return {
+        x: tipX - stage.left,
+        y: tipY - stage.top
+      };
     }
 
     // Haversine calculation (Miles)
@@ -482,45 +439,7 @@
       return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     }
 
-    // Polyline decoding utility
-    function decodePolyline(str, precision) {
-      var index = 0,
-          lat = 0,
-          lng = 0,
-          coordinates = [],
-          shift = 0,
-          result = 0,
-          byte = null,
-          factor = Math.pow(10, precision || 5);
-
-      while (index < str.length) {
-        byte = null;
-        shift = 0;
-        result = 0;
-        do {
-          byte = str.charCodeAt(index++) - 63;
-          result |= (byte & 0x1f) << shift;
-          shift += 5;
-        } while (byte >= 0x20);
-        var latitude = ((result & 1) ? ~(result >> 1) : (result >> 1));
-        lat += latitude;
-
-        shift = 0;
-        result = 0;
-        do {
-          byte = str.charCodeAt(index++) - 63;
-          result |= (byte & 0x1f) << shift;
-          shift += 5;
-        } while (byte >= 0x20);
-        var longitude = ((result & 1) ? ~(result >> 1) : (result >> 1));
-        lng += longitude;
-
-        coordinates.push([lat / factor, lng / factor]);
-      }
-      return coordinates;
-    }
-
-    // Fetch exact trajectory route via OpenStreetMap OSRM
+    // OSRM Real-world routing call
     async function fetchRealRoute(lat1, lng1, lat2, lng2, mode) {
       const profile = OSRM_PROFILES[mode] || 'driving';
       const url = `https://router.project-osrm.org/route/v1/${profile}/${lng1},${lat1};${lng2},${lat2}?overview=full&geometries=polyline`;
@@ -529,21 +448,17 @@
         const response = await fetch(url);
         const data = await response.json();
         if (data.routes && data.routes.length > 0) {
-          const route = data.routes[0];
-          const coords = decodePolyline(route.geometry);
           return {
-            points: coords,
-            distanceMeters: route.distance,
-            durationSeconds: route.duration
+            distanceMeters: data.routes[0].distance,
+            durationSeconds: data.routes[0].duration
           };
         }
       } catch (err) {
-        console.warn("OSRM Route Service unavailable, generating calculated trajectory corridor", err);
+        console.warn("OSRM Route Service unavailable, using estimation corridor", err);
       }
       return null;
     }
 
-    // Main route update controller
     async function updateRoute() {
       const routePath = document.getElementById('route-path');
       const distText = document.getElementById('distance-text');
@@ -565,42 +480,27 @@
       const p1 = getMarkerTip(m1);
       const p2 = getMarkerTip(m2);
 
-      // Fetch real-world trajectory path
-      const realRoute = await fetchRealRoute(lat1, lon1, lat2, lon2, selectedMode);
+      // Curved Path
+      const dx = p2.x - p1.x;
+      const dy = p2.y - p1.y;
+      const cx = (p1.x + p2.x) / 2 - dy * 0.2;
+      const cy = (p1.y + p2.y) / 2 + dx * 0.2;
 
-      let pathD = "";
-      let midPoint = { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 };
+      const pathD = `M ${p1.x} ${p1.y} Q ${cx} ${cy} ${p2.x} ${p2.y}`;
+      routePath.setAttribute('d', pathD);
+
+      const midPoint = { x: (p1.x + 2 * cx + p2.x) / 4, y: (p1.y + 2 * cy + p2.y) / 4 };
+
+      // Distance & Duration
+      const realRoute = await fetchRealRoute(lat1, lon1, lat2, lon2, selectedMode);
       let distMiles = 0;
       let durationSec = 0;
 
-      if (realRoute && realRoute.points.length > 0) {
-        // Map trajectory coordinates to screen space
-        const screenPoints = realRoute.points.map(pt => latLngToScreen(pt[0], pt[1]));
-        screenPoints[0] = p1; // Connect start marker tip
-        screenPoints[screenPoints.length - 1] = p2; // Connect end marker tip
-
-        pathD = `M ${screenPoints[0].x} ${screenPoints[0].y}`;
-        for (let i = 1; i < screenPoints.length; i++) {
-          pathD += ` L ${screenPoints[i].x} ${screenPoints[i].y}`;
-        }
-
-        // Mid point along trajectory line
-        const midIdx = Math.floor(screenPoints.length / 2);
-        midPoint = screenPoints[midIdx];
-
+      if (realRoute) {
         distMiles = realRoute.distanceMeters * 0.000621371;
         durationSec = realRoute.durationSeconds;
-        if (selectedMode === 'train') durationSec *= 0.65; // High speed MTR factor
+        if (selectedMode === 'train') durationSec *= 0.65;
       } else {
-        // Fallback smooth terrain curve trajectory
-        const dx = p2.x - p1.x;
-        const dy = p2.y - p1.y;
-        const cx = (p1.x + p2.x) / 2 - dy * 0.22;
-        const cy = (p1.y + p2.y) / 2 + dx * 0.22;
-
-        pathD = `M ${p1.x} ${p1.y} Q ${cx} ${cy} ${p2.x} ${p2.y}`;
-        midPoint = { x: (p1.x + 2 * cx + p2.x) / 4, y: (p1.y + 2 * cy + p2.y) / 4 };
-
         const directDist = calculateDistanceMiles(lat1, lon1, lat2, lon2);
         const multipliers = { walk: 1.3, train: 1.15, car: 1.35 };
         const speeds = { walk: 3, train: 32, car: 24 };
@@ -608,8 +508,6 @@
         distMiles = directDist * (multipliers[selectedMode] || 1.25);
         durationSec = (distMiles / (speeds[selectedMode] || 10)) * 3600;
       }
-
-      routePath.setAttribute('d', pathD);
 
       // Distance Format
       const roundedDist = Math.round(distMiles);
@@ -630,14 +528,13 @@
         timeText.textContent = `around ${Math.max(1, mins)} minutes`;
       }
 
-      // Position Text Overlay at middle of route trajectory
       distText.setAttribute('x', midPoint.x);
       distText.setAttribute('y', midPoint.y - 12);
       timeText.setAttribute('x', midPoint.x);
       timeText.setAttribute('y', midPoint.y + 14);
     }
 
-    // Marker Click Handler
+    // Handlers
     document.querySelectorAll('.marker').forEach(marker => {
       marker.addEventListener('click', () => {
         if (selectedMarkers.includes(marker)) return;
@@ -654,7 +551,6 @@
       });
     });
 
-    // Transport Toggle Selector
     document.querySelectorAll('.mode-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
@@ -664,21 +560,13 @@
       });
     });
 
-    // Clear Journey
     document.getElementById('clear-journey').addEventListener('click', () => {
       selectedMarkers.forEach(m => m.classList.remove('selected'));
       selectedMarkers = [];
       updateRoute();
     });
 
-    // Handle Window Resizing
-    window.addEventListener('resize', () => {
-      positionMarkersRealWorld();
-      updateRoute();
-    });
-
-    // Initial setup
-    positionMarkersRealWorld();
+    window.addEventListener('resize', updateRoute);
   </script>
 </body>
 </html>
