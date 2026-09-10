@@ -46,14 +46,14 @@
       background-color: transparent;
     }
 
-    /* SVG Overlay for drawing path */
+    /* SVG Overlay for drawing path and high-priority labels */
     .journey-overlay {
       position: absolute;
       inset: 0;
       width: 100%;
       height: 100%;
       pointer-events: none;
-      z-index: 10;
+      z-index: 50; /* Above markers */
     }
 
     .marker {
@@ -146,11 +146,11 @@
       position: absolute;
       top: 1.5rem;
       left: 1.5rem;
-      z-index: 40;
+      z-index: 60;
       display: flex;
       flex-direction: column;
       align-items: center;
-      background: rgba(255, 255, 255, 0.9);
+      background: rgba(255, 255, 255, 0.92);
       backdrop-filter: blur(8px);
       border: 1px solid rgba(0, 0, 0, 0.1);
       padding: 0.5rem 0.75rem;
@@ -172,7 +172,7 @@
       bottom: 1.5rem;
       left: 50%;
       transform: translateX(-50%);
-      z-index: 40;
+      z-index: 60;
       background: rgba(255, 255, 255, 0.92);
       backdrop-filter: blur(12px);
       border: 1px solid rgba(0, 0, 0, 0.08);
@@ -204,6 +204,26 @@
       box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
     }
 
+    /* SVG Label Text Styling: White text, Black outline, Glow effect */
+    .route-text {
+      font-family: "DM Sans", sans-serif;
+      font-weight: 700;
+      fill: #ffffff;
+      stroke: #000000;
+      stroke-width: 3.5px;
+      paint-order: stroke fill;
+      stroke-linejoin: round;
+      filter: drop-shadow(0px 2px 6px rgba(0,0,0,0.85));
+    }
+
+    .route-text-sub {
+      font-size: 13px;
+    }
+
+    .route-text-main {
+      font-size: 15px;
+    }
+
     @keyframes settle-in {
       from {
         opacity: 0;
@@ -218,73 +238,74 @@
 </head>
 <body class="w-full">
 
-  <!-- Clear Journey Top-Left Control -->
+  <!-- Clear Journey Control -->
   <button id="clear-journey" class="clear-btn" aria-label="Clear journey">
     <i data-lucide="x" class="w-6 h-6 text-stone-800"></i>
     <span class="text-xs font-bold text-stone-700 mt-0.5">clear journey</span>
   </button>
 
   <main class="board-stage" aria-label="Hong Kong Map Stage">
-    <!-- SVG layer for journey path and labels -->
+    <!-- SVG overlay sitting above all elements -->
     <svg class="journey-overlay" id="journey-svg">
       <defs>
-        <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-          <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000000" flood-opacity="0.3"/>
+        <filter id="line-shadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000000" flood-opacity="0.5"/>
         </filter>
       </defs>
-      <!-- Path line -->
-      <path id="route-path" d="" fill="none" stroke="#10b981" stroke-width="5" stroke-dasharray="8 6" stroke-linecap="round"/>
-      <!-- Text overlays along the journey path -->
-      <g id="route-labels" filter="url(#glow)">
-        <text id="distance-text" fill="#10b981" font-weight="700" font-size="14" text-anchor="middle"></text>
-        <text id="time-text" fill="#27272a" font-weight="700" font-size="13" text-anchor="middle"></text>
+      <!-- Trajectory Route Line -->
+      <path id="route-path" d="" fill="none" stroke="#10b981" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" filter="url(#line-shadow)"/>
+      
+      <!-- Topmost Label Group -->
+      <g id="route-labels">
+        <text id="distance-text" class="route-text route-text-main" text-anchor="middle"></text>
+        <text id="time-text" class="route-text route-text-sub" text-anchor="middle"></text>
       </g>
     </svg>
 
     <!-- Real-world Placed Markers -->
-    <article class="marker" data-id="wetland-park" data-lat="22.4716" data-lng="114.0088" style="top: 10%; left: 36%;">
+    <article class="marker" data-id="wetland-park" data-lat="22.4716" data-lng="114.0088">
       <div class="marker-frame">
         <img src="./images/wetland-park.jpg" alt="Tin Shui Wai Wetland Park">
         <p class="marker-label">Wetland Park</p>
       </div>
     </article>
 
-    <article class="marker" data-id="geopark" data-lat="22.3642" data-lng="114.3712" style="top: 32%; left: 82%;">
+    <article class="marker" data-id="geopark" data-lat="22.3642" data-lng="114.3712">
       <div class="marker-frame">
         <img src="./images/geopark.jpg" alt="Hong Kong Geopark">
         <p class="marker-label">HK Geopark</p>
       </div>
     </article>
 
-    <article class="marker" data-id="twscps" data-lat="22.3713" data-lng="114.1142" style="top: 38%; left: 45%;">
+    <article class="marker" data-id="twscps" data-lat="22.3713" data-lng="114.1142">
       <div class="marker-frame">
         <img src="./images/twscps.jpg" alt="TWSCPS">
         <p class="marker-label">TWSCPS</p>
       </div>
     </article>
 
-    <article class="marker" data-id="golden-bauhinia" data-lat="22.2835" data-lng="114.1736" style="top: 58%; left: 58%;">
+    <article class="marker" data-id="golden-bauhinia" data-lat="22.2835" data-lng="114.1736">
       <div class="marker-frame">
         <img src="./images/golden-bauhinia.jpg" alt="Golden Bauhinia Square">
         <p class="marker-label">Golden Bauhinia</p>
       </div>
     </article>
 
-    <article class="marker" data-id="the-peak" data-lat="22.2710" data-lng="114.1499" style="top: 65%; left: 52%;">
+    <article class="marker" data-id="the-peak" data-lat="22.2710" data-lng="114.1499">
       <div class="marker-frame">
         <img src="./images/the-peak.jpg" alt="The Peak">
         <p class="marker-label">The Peak</p>
       </div>
     </article>
 
-    <article class="marker" data-id="big-buddha" data-lat="22.2540" data-lng="113.9050" style="top: 72%; left: 18%;">
+    <article class="marker" data-id="big-buddha" data-lat="22.2540" data-lng="113.9050">
       <div class="marker-frame">
         <img src="./images/big-buddha.jpg" alt="The Big Buddha">
         <p class="marker-label">The Big Buddha</p>
       </div>
     </article>
 
-    <article class="marker" data-id="tai-o" data-lat="22.2522" data-lng="113.8631" style="top: 73%; left: 8%;">
+    <article class="marker" data-id="tai-o" data-lat="22.2522" data-lng="113.8631">
       <div class="marker-frame">
         <img src="./images/tai-o.jpg" alt="Tai O">
         <p class="marker-label">Tai O</p>
@@ -311,70 +332,134 @@
   <script>
     lucide.createIcons();
 
-    // Map bounds (Approximate Lat/Lng box covering HK region)
+    // Geographic Hong Kong bounding box
     const MAP_BOUNDS = {
-      north: 22.5600,
-      south: 22.1500,
-      west: 113.8000,
-      east: 114.4500
+      north: 22.5400,
+      south: 22.1800,
+      west: 113.8200,
+      east: 114.4000
     };
 
     let selectedMode = 'walk';
     let selectedMarkers = [];
 
-    // Mode Speeds (mph) & Winding Multipliers
-    const MODE_CONFIG = {
-      walk: { speed: 3, factor: 1.25 },
-      train: { speed: 30, factor: 1.15 },
-      car: { speed: 25, factor: 1.35 }
+    // OSRM Service profile mapping
+    const OSRM_PROFILES = {
+      walk: 'foot',
+      car: 'driving',
+      train: 'driving' // Trains fallback to realistic transit road corridors
     };
 
-    // Initialize position based on real coordinates
-    function positionMarkersRealWorld() {
+    // Real-world Lat/Lng to Screen Pixel coordinate mapping
+    function latLngToScreen(lat, lng) {
       const stage = document.querySelector('.board-stage');
-      const markers = document.querySelectorAll('.marker');
       const width = stage.clientWidth;
       const height = stage.clientHeight;
 
+      const xPct = (lng - MAP_BOUNDS.west) / (MAP_BOUNDS.east - MAP_BOUNDS.west);
+      const yPct = (MAP_BOUNDS.north - lat) / (MAP_BOUNDS.north - MAP_BOUNDS.south);
+
+      return {
+        x: xPct * (width - 120) + 60,
+        y: yPct * (height - 140) + 70
+      };
+    }
+
+    function positionMarkersRealWorld() {
+      const markers = document.querySelectorAll('.marker');
       markers.forEach(marker => {
         const lat = parseFloat(marker.dataset.lat);
         const lng = parseFloat(marker.dataset.lng);
+        const pos = latLngToScreen(lat, lng);
 
-        const xPct = (lng - MAP_BOUNDS.west) / (MAP_BOUNDS.east - MAP_BOUNDS.west);
-        const yPct = (MAP_BOUNDS.north - lat) / (MAP_BOUNDS.north - MAP_BOUNDS.south);
-
-        const x = xPct * (width - 100) + 20;
-        const y = yPct * (height - 120) + 40;
-
-        marker.style.left = `${x}px`;
-        marker.style.top = `${y}px`;
+        marker.style.left = `${pos.x - 30}px`;
+        marker.style.top = `${pos.y - 60}px`;
       });
     }
 
-    // Haversine distance formula (in Miles)
+    function getMarkerTip(marker) {
+      const rect = marker.getBoundingClientRect();
+      return {
+        x: rect.left + rect.width / 2,
+        y: rect.bottom - (rect.height * 0.08)
+      };
+    }
+
+    // Haversine calculation (Miles)
     function calculateDistanceMiles(lat1, lon1, lat2, lon2) {
-      const R = 3958.8; // Radius of earth in miles
+      const R = 3958.8;
       const dLat = (lat2 - lat1) * Math.PI / 180;
       const dLon = (lon2 - lon1) * Math.PI / 180;
       const a = 
         Math.sin(dLat/2) * Math.sin(dLat/2) +
         Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
         Math.sin(dLon/2) * Math.sin(dLon/2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-      return R * c;
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     }
 
-    // Get anchor center of marker pin
-    function getMarkerCenter(marker) {
-      const rect = marker.getBoundingClientRect();
-      return {
-        x: rect.left + rect.width / 2,
-        y: rect.bottom - (rect.height * 0.1) // Tip of the marker pin
-      };
+    // Polyline decoding utility
+    function decodePolyline(str, precision) {
+      var index = 0,
+          lat = 0,
+          lng = 0,
+          coordinates = [],
+          shift = 0,
+          result = 0,
+          byte = null,
+          factor = Math.pow(10, precision || 5);
+
+      while (index < str.length) {
+        byte = null;
+        shift = 0;
+        result = 0;
+        do {
+          byte = str.charCodeAt(index++) - 63;
+          result |= (byte & 0x1f) << shift;
+          shift += 5;
+        } while (byte >= 0x20);
+        var latitude = ((result & 1) ? ~(result >> 1) : (result >> 1));
+        lat += latitude;
+
+        shift = 0;
+        result = 0;
+        do {
+          byte = str.charCodeAt(index++) - 63;
+          result |= (byte & 0x1f) << shift;
+          shift += 5;
+        } while (byte >= 0x20);
+        var longitude = ((result & 1) ? ~(result >> 1) : (result >> 1));
+        lng += longitude;
+
+        coordinates.push([lat / factor, lng / factor]);
+      }
+      return coordinates;
     }
 
-    // Draw route and calculate distance/time
-    function updateRoute() {
+    // Fetch exact trajectory route via OpenStreetMap OSRM
+    async function fetchRealRoute(lat1, lng1, lat2, lng2, mode) {
+      const profile = OSRM_PROFILES[mode] || 'driving';
+      const url = `https://router.project-osrm.org/route/v1/${profile}/${lng1},${lat1};${lng2},${lat2}?overview=full&geometries=polyline`;
+
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+        if (data.routes && data.routes.length > 0) {
+          const route = data.routes[0];
+          const coords = decodePolyline(route.geometry);
+          return {
+            points: coords,
+            distanceMeters: route.distance,
+            durationSeconds: route.duration
+          };
+        }
+      } catch (err) {
+        console.warn("OSRM Route Service unavailable, generating calculated trajectory corridor", err);
+      }
+      return null;
+    }
+
+    // Main route update controller
+    async function updateRoute() {
       const routePath = document.getElementById('route-path');
       const distText = document.getElementById('distance-text');
       const timeText = document.getElementById('time-text');
@@ -387,39 +472,70 @@
       }
 
       const [m1, m2] = selectedMarkers;
-      const p1 = getMarkerCenter(m1);
-      const p2 = getMarkerCenter(m2);
-
-      // Create slight curved path
-      const dx = p2.x - p1.x;
-      const dy = p2.y - p1.y;
-      const cx = (p1.x + p2.x) / 2 - dy * 0.15;
-      const cy = (p1.y + p2.y) / 2 + dx * 0.15;
-
-      const pathData = `M ${p1.x} ${p1.y} Q ${cx} ${cy} ${p2.x} ${p2.y}`;
-      routePath.setAttribute('d', pathData);
-
-      // Calculate real-world metrics
       const lat1 = parseFloat(m1.dataset.lat);
       const lon1 = parseFloat(m1.dataset.lng);
       const lat2 = parseFloat(m2.dataset.lat);
       const lon2 = parseFloat(m2.dataset.lng);
 
-      const directDist = calculateDistanceMiles(lat1, lon1, lat2, lon2);
-      const config = MODE_CONFIG[selectedMode];
-      const estimatedDist = directDist * config.factor;
-      const roundedDist = Math.round(estimatedDist);
+      const p1 = getMarkerTip(m1);
+      const p2 = getMarkerTip(m2);
 
-      // Format distance
-      if (roundedDist <= 1) {
-        distText.textContent = "less than 1 mile";
+      // Attempt to load real-world trajectory path
+      const realRoute = await fetchRealRoute(lat1, lon1, lat2, lon2, selectedMode);
+
+      let pathD = "";
+      let midPoint = { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 };
+      let distMiles = 0;
+      let durationSec = 0;
+
+      if (realRoute && realRoute.points.length > 0) {
+        // Map trajectory coordinates to screen space
+        const screenPoints = realRoute.points.map(pt => latLngToScreen(pt[0], pt[1]));
+        screenPoints[0] = p1; // Connect start marker tip
+        screenPoints[screenPoints.length - 1] = p2; // Connect end marker tip
+
+        pathD = `M ${screenPoints[0].x} ${screenPoints[0].y}`;
+        for (let i = 1; i < screenPoints.length; i++) {
+          pathD += ` L ${screenPoints[i].x} ${screenPoints[i].y}`;
+        }
+
+        // Get mid point along trajectory line
+        const midIdx = Math.floor(screenPoints.length / 2);
+        midPoint = screenPoints[midIdx];
+
+        distMiles = realRoute.distanceMeters * 0.000621371;
+        durationSec = realRoute.durationSeconds;
+        if (selectedMode === 'train') durationSec *= 0.65; // High speed MTR factor
       } else {
-        distText.textContent = `around ${roundedDist} miles`;
+        // Fallback smooth terrain curve trajectory
+        const dx = p2.x - p1.x;
+        const dy = p2.y - p1.y;
+        const cx = (p1.x + p2.x) / 2 - dy * 0.22;
+        const cy = (p1.y + p2.y) / 2 + dx * 0.22;
+
+        pathD = `M ${p1.x} ${p1.y} Q ${cx} ${cy} ${p2.x} ${p2.y}`;
+        midPoint = { x: (p1.x + 2 * cx + p2.x) / 4, y: (p1.y + 2 * cy + p2.y) / 4 };
+
+        const directDist = calculateDistanceMiles(lat1, lon1, lat2, lon2);
+        const multipliers = { walk: 1.3, train: 1.15, car: 1.35 };
+        const speeds = { walk: 3, train: 32, car: 24 };
+
+        distMiles = directDist * (multipliers[selectedMode] || 1.25);
+        durationSec = (distMiles / (speeds[selectedMode] || 10)) * 3600;
       }
 
-      // Calculate travel time
-      const timeHours = estimatedDist / config.speed;
-      const totalMinutes = Math.round(timeHours * 60);
+      routePath.setAttribute('d', pathD);
+
+      // Distance Format
+      const roundedDist = Math.round(distMiles);
+      if (distMiles < 0.8) {
+        distText.textContent = "less than 1 mile";
+      } else {
+        distText.textContent = `around ${Math.max(1, roundedDist)} mile${roundedDist > 1 ? 's' : ''}`;
+      }
+
+      // Time Format
+      const totalMinutes = Math.round(durationSec / 60);
       const hrs = Math.floor(totalMinutes / 60);
       const mins = totalMinutes % 60;
 
@@ -429,17 +545,14 @@
         timeText.textContent = `around ${Math.max(1, mins)} minutes`;
       }
 
-      // Position labels at center of curve
-      const midX = (p1.x + 2 * cx + p2.x) / 4;
-      const midY = (p1.y + 2 * cy + p2.y) / 4;
-
-      distText.setAttribute('x', midX);
-      distText.setAttribute('y', midY - 10);
-      timeText.setAttribute('x', midX);
-      timeText.setAttribute('y', midY + 16);
+      // Position Text Overlay at middle of route trajectory
+      distText.setAttribute('x', midPoint.x);
+      distText.setAttribute('y', midPoint.y - 12);
+      timeText.setAttribute('x', midPoint.x);
+      timeText.setAttribute('y', midPoint.y + 14);
     }
 
-    // Handle marker selections
+    // Marker Click Handler
     document.querySelectorAll('.marker').forEach(marker => {
       marker.addEventListener('click', () => {
         if (selectedMarkers.includes(marker)) return;
@@ -456,7 +569,7 @@
       });
     });
 
-    // Transport Mode Toggle Button logic
+    // Transport Toggle Selector
     document.querySelectorAll('.mode-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
@@ -473,13 +586,13 @@
       updateRoute();
     });
 
-    // Setup viewport height and responsive layout adjustments
+    // Handle Window Resizing
     window.addEventListener('resize', () => {
       positionMarkersRealWorld();
       updateRoute();
     });
 
-    // Initial positioning
+    // Initial setup
     positionMarkersRealWorld();
   </script>
 </body>
