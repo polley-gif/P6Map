@@ -55,20 +55,20 @@
       pointer-events: none;
     }
 
-    .marker {
-      position: absolute;
-      width: clamp(90px, 13vw, 190px);
-      aspect-ratio: 1 / 1.18;
-      padding: 0;
-      border: 0;
-      background: transparent;
-      filter: drop-shadow(0 12px 12px var(--marker-shadow));
-      animation: settle-in 620ms cubic-bezier(.2, .8, .2, 1) both;
-      cursor: grab;
-      touch-action: none;
-      user-select: none;
-      will-change: transform;
-    }
+  .marker {
+    position: absolute;
+    width: clamp(63px, 9.1vw, 133px); /* Reduced by 30% */
+    aspect-ratio: 1 / 1.18;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    filter: drop-shadow(0 12px 12px var(--marker-shadow));
+    animation: settle-in 620ms cubic-bezier(.2, .8, .2, 1) both;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+    will-change: transform;
+  }
 
     .marker:focus-visible {
       outline: 4px solid #1c1917;
@@ -141,13 +141,16 @@
       transform: scale(1.06);
     }
 
-    .marker-a { left: 7%; top: 9%; transform: rotate(-8deg); animation-delay: 60ms; }
-    .marker-b { left: 28%; top: 10%; transform: rotate(6deg); animation-delay: 120ms; }
-    .marker-c { right: 23%; top: 7%; transform: rotate(-4deg); animation-delay: 180ms; }
-    .marker-d { right: 6%; top: 19%; transform: rotate(8deg); animation-delay: 240ms; }
-    .marker-e { left: 13%; bottom: 7%; transform: rotate(5deg); animation-delay: 300ms; }
-    .marker-f { left: 44%; bottom: 5%; transform: rotate(-7deg); animation-delay: 360ms; }
-    .marker-g { right: 8%; bottom: 7%; transform: rotate(5deg); animation-delay: 420ms; }
+/* Left side markers (4 items spaced vertically) */
+.marker-a { left: 2%; top: 5%; transform: rotate(-8deg); animation-delay: 60ms; }
+.marker-b { left: 2%; top: 28%; transform: rotate(6deg); animation-delay: 120ms; }
+.marker-c { left: 2%; top: 51%; transform: rotate(-4deg); animation-delay: 180ms; }
+.marker-d { left: 2%; top: 74%; transform: rotate(8deg); animation-delay: 240ms; }
+
+/* Right side markers (3 items spaced vertically) */
+.marker-e { right: 2%; left: auto; top: 12%; transform: rotate(5deg); animation-delay: 300ms; }
+.marker-f { right: 2%; left: auto; top: 40%; transform: rotate(-7deg); animation-delay: 360ms; }
+.marker-g { right: 2%; left: auto; top: 68%; transform: rotate(5deg); animation-delay: 420ms; }
 
     @keyframes settle-in {
       from {
@@ -176,7 +179,7 @@
       }
 
       .marker {
-        width: min(36vw, 155px);
+        width: min(25vw, 108px);
         position: relative;
         inset: auto;
         justify-self: center;
@@ -269,14 +272,6 @@
 
         const marker = active.marker;
         marker.classList.remove("is-dragging");
-
-        if (window.innerWidth <= 700) {
-          marker.style.left = "";
-          marker.style.top = "";
-          marker.style.right = "";
-          marker.style.bottom = "";
-        }
-
         active = null;
         latestEvent = null;
         framePending = false;
