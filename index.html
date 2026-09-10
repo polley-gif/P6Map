@@ -55,20 +55,21 @@
       pointer-events: none;
     }
 
-  .marker {
-    position: absolute;
-    width: clamp(63px, 9.1vw, 133px); /* Reduced by 30% */
-    aspect-ratio: 1 / 1.18;
-    padding: 0;
-    border: 0;
-    background: transparent;
-    filter: drop-shadow(0 12px 12px var(--marker-shadow));
-    animation: settle-in 620ms cubic-bezier(.2, .8, .2, 1) both;
-    cursor: grab;
-    touch-action: none;
-    user-select: none;
-    will-change: transform;
-  }
+    /* Marker Container */
+    .marker {
+      position: absolute;
+      width: clamp(63px, 9.1vw, 133px);
+      aspect-ratio: 1 / 1;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      filter: drop-shadow(0 12px 12px var(--marker-shadow));
+      animation: settle-in 620ms cubic-bezier(.2, .8, .2, 1) both;
+      cursor: grab;
+      touch-action: none;
+      user-select: none;
+      will-change: transform;
+    }
 
     .marker:focus-visible {
       outline: 4px solid #1c1917;
@@ -82,14 +83,23 @@
       z-index: 50;
     }
 
-    .marker::after {
+    /* Inner Rotating Node (Rotates Frame + Pointer Arrow seamlessly) */
+    .marker-rotator {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transform-origin: center center;
+    }
+
+    /* Triangle Pointer Arrow pinned to the circle bottom */
+    .marker-rotator::after {
       content: "";
       position: absolute;
-      z-index: -1;
-      width: 38%;
+      z-index: 0;
+      width: 32%;
       aspect-ratio: 1;
       left: 50%;
-      bottom: 1.8%;
+      bottom: -10%;
       transform: translateX(-50%) rotate(45deg);
       background: var(--marker-red);
       border-right: 3px solid var(--marker-red);
@@ -98,9 +108,9 @@
 
     .marker-frame {
       width: 100%;
-      aspect-ratio: 1;
+      height: 100%;
       overflow: hidden;
-      border: 3px solid var(--marker-red);
+      border: 3.5px solid var(--marker-red);
       border-radius: 50%;
       background: #fff7ed;
       position: relative;
@@ -116,11 +126,44 @@
       transition: transform 300ms ease;
     }
 
+    /* Rotation Handle Button */
+    .rotate-btn {
+      position: absolute;
+      top: -2px;
+      right: -2px;
+      z-index: 10;
+      width: clamp(22px, 2.5vw, 32px);
+      height: clamp(22px, 2.5vw, 32px);
+      border-radius: 50%;
+      background: #ffffff;
+      border: 2px solid var(--marker-red);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      touch-action: none;
+      transition: background-color 0.15s ease, transform 0.15s ease;
+    }
+
+    .rotate-btn:hover {
+      background-color: #fee2e2;
+      transform: scale(1.1);
+    }
+
+    .rotate-btn svg {
+      width: 60%;
+      height: 60%;
+      stroke: var(--marker-red);
+      stroke-width: 2.5;
+    }
+
+    /* Text Label - Counter-Rotated so it remains horizontal */
     .marker-label {
       position: absolute;
-      z-index: 3;
+      z-index: 5;
       left: 50%;
-      bottom: 12%;
+      bottom: 8%;
       transform: translateX(-50%);
       width: 88%;
       margin: 0;
@@ -134,6 +177,7 @@
       text-align: center;
       text-wrap: balance;
       pointer-events: none;
+      transform-origin: center center;
     }
 
     .marker:hover .marker-frame img,
@@ -141,16 +185,15 @@
       transform: scale(1.06);
     }
 
-/* Left side markers (4 items spaced vertically) */
-.marker-a { left: 2%; top: 5%; transform: rotate(-8deg); animation-delay: 60ms; }
-.marker-b { left: 2%; top: 28%; transform: rotate(6deg); animation-delay: 120ms; }
-.marker-c { left: 2%; top: 51%; transform: rotate(-4deg); animation-delay: 180ms; }
-.marker-d { left: 2%; top: 74%; transform: rotate(8deg); animation-delay: 240ms; }
+    /* Initial Positions */
+    .marker-a { left: 2%; top: 5%; animation-delay: 60ms; }
+    .marker-b { left: 2%; top: 28%; animation-delay: 120ms; }
+    .marker-c { left: 2%; top: 51%; animation-delay: 180ms; }
+    .marker-d { left: 2%; top: 74%; animation-delay: 240ms; }
 
-/* Right side markers (3 items spaced vertically) */
-.marker-e { right: 2%; left: auto; top: 12%; transform: rotate(5deg); animation-delay: 300ms; }
-.marker-f { right: 2%; left: auto; top: 40%; transform: rotate(-7deg); animation-delay: 360ms; }
-.marker-g { right: 2%; left: auto; top: 68%; transform: rotate(5deg); animation-delay: 420ms; }
+    .marker-e { right: 2%; left: auto; top: 12%; animation-delay: 300ms; }
+    .marker-f { right: 2%; left: auto; top: 40%; animation-delay: 360ms; }
+    .marker-g { right: 2%; left: auto; top: 68%; animation-delay: 420ms; }
 
     @keyframes settle-in {
       from {
@@ -171,9 +214,6 @@
       .board-stage {
         min-height: calc(100 * min(var(--vh, 1vh), 1vh));
         display: block;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        align-content: center;
-        gap: 1.7rem 1.2rem;
         padding: 2rem 1.5rem 3rem;
         touch-action: pan-y;
       }
@@ -181,24 +221,6 @@
       .marker {
         width: min(25vw, 108px);
         position: absolute;
-        inset: auto;
-        justify-self: center;
-      }
-
-      .marker.is-dragging {
-        position: absolute;
-      }
-
-      .marker-a { transform: rotate(-7deg); }
-      .marker-b { transform: rotate(6deg); }
-      .marker-c { transform: rotate(-4deg); }
-      .marker-d { transform: rotate(7deg); }
-      .marker-e { transform: rotate(4deg); }
-      .marker-f { transform: rotate(-6deg); }
-
-      .marker-g {
-        transform: rotate(5deg);
-        grid-column: 1 / -1;
       }
     }
   </style>
@@ -206,51 +228,104 @@
 </head>
 <body class="w-full">
   <main class="board-stage" aria-label="Image greeting board">
-    <article class="marker marker-a" tabindex="0" aria-label="Image marker one">
-      <div class="marker-frame">
-        <img class="canva-image" loading="lazy" src="./images/big-buddha.jpg" alt="The Big Buddha">
-        <p class="marker-label canva-text" style="color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 16px;">The Big Buddha</p>
+    
+    <!-- Marker 1 -->
+    <article class="marker marker-a" tabindex="0" aria-label="The Big Buddha">
+      <div class="marker-rotator">
+        <div class="marker-frame">
+          <img class="canva-image" loading="lazy" src="./images/big-buddha.jpg" alt="The Big Buddha">
+        </div>
+        <p class="marker-label">The Big Buddha</p>
       </div>
+      <button class="rotate-btn" aria-label="Rotate marker arrow" title="Drag to rotate arrow">
+        <i data-lucide="rotate-cw"></i>
+      </button>
     </article>
-    <article class="marker marker-b" tabindex="0" aria-label="Image marker two">
-      <div class="marker-frame">
-        <img class="canva-image" loading="lazy" src="./images/wetland-park.jpg" alt="Tin Shui Wai Wetland Park">
-        <p class="marker-label canva-text" style="color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 16px;">Tin Shui Wai Wetland Park</p>
+
+    <!-- Marker 2 -->
+    <article class="marker marker-b" tabindex="0" aria-label="Tin Shui Wai Wetland Park">
+      <div class="marker-rotator">
+        <div class="marker-frame">
+          <img class="canva-image" loading="lazy" src="./images/wetland-park.jpg" alt="Tin Shui Wai Wetland Park">
+        </div>
+        <p class="marker-label">Tin Shui Wai Wetland Park</p>
       </div>
+      <button class="rotate-btn" aria-label="Rotate marker arrow" title="Drag to rotate arrow">
+        <i data-lucide="rotate-cw"></i>
+      </button>
     </article>
-    <article class="marker marker-c" tabindex="0" aria-label="Image marker three">
-      <div class="marker-frame">
-        <img class="canva-image" loading="lazy" src="./images/twscps.jpg" alt="TWSCPS">
-        <p class="marker-label canva-text" style="color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 16px;">TWSCPS</p>
+
+    <!-- Marker 3 -->
+    <article class="marker marker-c" tabindex="0" aria-label="TWSCPS">
+      <div class="marker-rotator">
+        <div class="marker-frame">
+          <img class="canva-image" loading="lazy" src="./images/twscps.jpg" alt="TWSCPS">
+        </div>
+        <p class="marker-label">TWSCPS</p>
       </div>
+      <button class="rotate-btn" aria-label="Rotate marker arrow" title="Drag to rotate arrow">
+        <i data-lucide="rotate-cw"></i>
+      </button>
     </article>
-    <article class="marker marker-d" tabindex="0" aria-label="Image marker four">
-      <div class="marker-frame">
-        <img class="canva-image" loading="lazy" src="./images/geopark.jpg" alt="Hong Kong Geopark">
-        <p class="marker-label canva-text" style="color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 16px;">Hong Kong Geopark</p>
+
+    <!-- Marker 4 -->
+    <article class="marker marker-d" tabindex="0" aria-label="Hong Kong Geopark">
+      <div class="marker-rotator">
+        <div class="marker-frame">
+          <img class="canva-image" loading="lazy" src="./images/geopark.jpg" alt="Hong Kong Geopark">
+        </div>
+        <p class="marker-label">Hong Kong Geopark</p>
       </div>
+      <button class="rotate-btn" aria-label="Rotate marker arrow" title="Drag to rotate arrow">
+        <i data-lucide="rotate-cw"></i>
+      </button>
     </article>
-    <article class="marker marker-e" tabindex="0" aria-label="Image marker five">
-      <div class="marker-frame">
-        <img class="canva-image" loading="lazy" src="./images/golden-bauhinia.jpg" alt="Golden Bauhinia Square">
-        <p class="marker-label canva-text" style="color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 16px;">Golden Bauhinia Square</p>
+
+    <!-- Marker 5 -->
+    <article class="marker marker-e" tabindex="0" aria-label="Golden Bauhinia Square">
+      <div class="marker-rotator">
+        <div class="marker-frame">
+          <img class="canva-image" loading="lazy" src="./images/golden-bauhinia.jpg" alt="Golden Bauhinia Square">
+        </div>
+        <p class="marker-label">Golden Bauhinia Square</p>
       </div>
+      <button class="rotate-btn" aria-label="Rotate marker arrow" title="Drag to rotate arrow">
+        <i data-lucide="rotate-cw"></i>
+      </button>
     </article>
-    <article class="marker marker-f" tabindex="0" aria-label="Image marker six">
-      <div class="marker-frame">
-        <img class="canva-image" loading="lazy" src="./images/tai-o.jpg" alt="Tai O">
-        <p class="marker-label canva-text" style="color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 16px;">Tai O</p>
+
+    <!-- Marker 6 -->
+    <article class="marker marker-f" tabindex="0" aria-label="Tai O">
+      <div class="marker-rotator">
+        <div class="marker-frame">
+          <img class="canva-image" loading="lazy" src="./images/tai-o.jpg" alt="Tai O">
+        </div>
+        <p class="marker-label">Tai O</p>
       </div>
+      <button class="rotate-btn" aria-label="Rotate marker arrow" title="Drag to rotate arrow">
+        <i data-lucide="rotate-cw"></i>
+      </button>
     </article>
-    <article class="marker marker-g" tabindex="0" aria-label="Image marker seven">
-      <div class="marker-frame">
-        <img class="canva-image" loading="lazy" src="./images/the-peak.jpg" alt="The Peak">
-        <p class="marker-label canva-text" style="color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 16px;">The Peak</p>
+
+    <!-- Marker 7 -->
+    <article class="marker marker-g" tabindex="0" aria-label="The Peak">
+      <div class="marker-rotator">
+        <div class="marker-frame">
+          <img class="canva-image" loading="lazy" src="./images/the-peak.jpg" alt="The Peak">
+        </div>
+        <p class="marker-label">The Peak</p>
       </div>
+      <button class="rotate-btn" aria-label="Rotate marker arrow" title="Drag to rotate arrow">
+        <i data-lucide="rotate-cw"></i>
+      </button>
     </article>
+
   </main>
+
   <script>
     (() => {
+      lucide.createIcons();
+
       const setViewportHeight = () => {
         document.documentElement.style.setProperty("--vh", `${window.innerHeight * 0.01}px`);
       };
@@ -260,21 +335,19 @@
 
       const stage = document.querySelector(".board-stage");
       const markers = document.querySelectorAll(".marker");
-      let active = null;
-      let framePending = false;
-      let latestEvent = null;
+
+      let activeDrag = null;
+      let activeRotate = null;
 
       function stopInteraction(event) {
-        if (!active) return;
-        if (event && event.pointerId !== undefined && active.pointerId !== event.pointerId) return;
+        if (activeDrag && (!event || event.pointerId === undefined || activeDrag.pointerId === event.pointerId)) {
+          activeDrag.marker.classList.remove("is-dragging");
+          activeDrag = null;
+        }
 
-        if (active.raf) cancelAnimationFrame(active.raf);
-
-        const marker = active.marker;
-        marker.classList.remove("is-dragging");
-        active = null;
-        latestEvent = null;
-        framePending = false;
+        if (activeRotate && (!event || event.pointerId === undefined || activeRotate.pointerId === event.pointerId)) {
+          activeRotate = null;
+        }
       }
 
       function moveMarker(marker, left, top) {
@@ -290,31 +363,78 @@
         marker.style.bottom = "auto";
       }
 
+      function applyRotation(marker, angleDeg) {
+        const rotator = marker.querySelector(".marker-rotator");
+        const label = marker.querySelector(".marker-label");
+
+        // Rotate the inner container (arrow + frame)
+        rotator.style.transform = `rotate(${angleDeg}deg)`;
+
+        // Counter-rotate text label so it remains upright and horizontal
+        label.style.transform = `translateX(-50%) rotate(${-angleDeg}deg)`;
+        marker.dataset.rotation = angleDeg;
+      }
+
       markers.forEach((marker) => {
+        marker.dataset.rotation = marker.dataset.rotation || "0";
+        const rotateBtn = marker.querySelector(".rotate-btn");
+
+        // 1. ROTATION CONTROL HANDLER
+        rotateBtn.addEventListener("pointerdown", (event) => {
+          if (event.button !== 0) return;
+          event.stopPropagation(); // Stop main drag trigger
+          event.preventDefault();
+
+          const rect = marker.getBoundingClientRect();
+          const centerX = rect.left + rect.width / 2;
+          const centerY = rect.top + rect.height / 2;
+
+          const currentAngle = parseFloat(marker.dataset.rotation) || 0;
+          const startMouseAngle = Math.atan2(event.clientY - centerY, event.clientX - centerX) * (180 / Math.PI);
+
+          activeRotate = {
+            marker,
+            pointerId: event.pointerId,
+            centerX,
+            centerY,
+            startAngle: currentAngle,
+            startMouseAngle
+          };
+
+          rotateBtn.setPointerCapture(event.pointerId);
+        });
+
+        rotateBtn.addEventListener("pointermove", (event) => {
+          if (!activeRotate || activeRotate.marker !== marker || activeRotate.pointerId !== event.pointerId) return;
+
+          const currentMouseAngle = Math.atan2(event.clientY - activeRotate.centerY, event.clientX - activeRotate.centerX) * (180 / Math.PI);
+          const angleDiff = currentMouseAngle - activeRotate.startMouseAngle;
+          const newAngle = (activeRotate.startAngle + angleDiff) % 360;
+
+          applyRotation(marker, newAngle);
+        });
+
+        // 2. MARKER POSITION DRAG HANDLER
         marker.addEventListener("pointerdown", (event) => {
           if (event.button !== 0) return;
+          if (event.target.closest(".rotate-btn")) return; // Don't drag if clicking rotate button
 
           event.preventDefault();
 
           const rect = marker.getBoundingClientRect();
           const stageRect = stage.getBoundingClientRect();
 
-          active = {
+          activeDrag = {
             marker,
             pointerId: event.pointerId,
             startX: event.clientX,
             startY: event.clientY,
             startLeft: rect.left - stageRect.left,
-            startTop: rect.top - stageRect.top,
-            markerWidth: marker.offsetWidth,
-            markerHeight: marker.offsetHeight,
-            stageWidth: stageRect.width,
-            stageHeight: stage.clientHeight,
-            raf: null
+            startTop: rect.top - stageRect.top
           };
 
-          marker.style.left = `${active.startLeft}px`;
-          marker.style.top = `${active.startTop}px`;
+          marker.style.left = `${activeDrag.startLeft}px`;
+          marker.style.top = `${activeDrag.startTop}px`;
           marker.style.right = "auto";
           marker.style.bottom = "auto";
           marker.classList.add("is-dragging");
@@ -322,55 +442,21 @@
         });
 
         marker.addEventListener("pointermove", (event) => {
-          if (!active || active.marker !== marker || active.pointerId !== event.pointerId) return;
+          if (!activeDrag || activeDrag.marker !== marker || activeDrag.pointerId !== event.pointerId) return;
 
-          latestEvent = event;
+          const dx = event.clientX - activeDrag.startX;
+          const dy = event.clientY - activeDrag.startY;
 
-          if (framePending) return;
-          framePending = true;
-
-          active.raf = requestAnimationFrame(() => {
-            if (!active || !latestEvent) {
-              framePending = false;
-              return;
-            }
-
-            const dx = latestEvent.clientX - active.startX;
-            const dy = latestEvent.clientY - active.startY;
-
-            moveMarker(marker, active.startLeft + dx, active.startTop + dy);
-            framePending = false;
-          });
+          moveMarker(marker, activeDrag.startLeft + dx, activeDrag.startTop + dy);
         });
 
         marker.addEventListener("pointerup", stopInteraction);
         marker.addEventListener("pointercancel", stopInteraction);
         marker.addEventListener("lostpointercapture", stopInteraction);
 
-        marker.addEventListener("keydown", (event) => {
-          if (window.innerWidth <= 700) return;
-
-          const directions = {
-            ArrowLeft: [-12, 0],
-            ArrowRight: [12, 0],
-            ArrowUp: [0, -12],
-            ArrowDown: [0, 12]
-          };
-
-          if (!directions[event.key]) return;
-
-          event.preventDefault();
-
-          const markerRect = marker.getBoundingClientRect();
-          const stageRect = stage.getBoundingClientRect();
-          const [xStep, yStep] = directions[event.key];
-
-          moveMarker(
-            marker,
-            markerRect.left - stageRect.left + xStep,
-            markerRect.top - stageRect.top + yStep
-          );
-        });
+        rotateBtn.addEventListener("pointerup", stopInteraction);
+        rotateBtn.addEventListener("pointercancel", stopInteraction);
+        rotateBtn.addEventListener("lostpointercapture", stopInteraction);
       });
 
       window.addEventListener("pointerup", stopInteraction, true);
